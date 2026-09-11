@@ -608,31 +608,53 @@
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    const myFirebaseConfig = {};
+    // 📌 ใส่ Firebase Config ของคุณที่นี่หากต้องการออนไลน์ข้อมูลพร้อมกันหลายเครื่อง
+    const myFirebaseConfig = {}; 
+    
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'banquet-app-github';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : (Object.keys(myFirebaseConfig).length > 0 ? myFirebaseConfig : { apiKey: "dummy" });
+    const isCloudEnabled = Object.keys(myFirebaseConfig).length > 0 || typeof __firebase_config !== 'undefined';
+    
+    // Config เปล่าสำหรับดักไม่ให้ Firebase SDK แจ้งเตือน Error จนแอปพัง
+    const fallbackConfig = { apiKey: "offline-key", projectId: "offline-project", appId: "1:123:web:123" };
+    const firebaseConfig = isCloudEnabled ? (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : myFirebaseConfig) : fallbackConfig;
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    let app, auth, db;
     let currentUser = null;
+    let GUESTS_PATH, TAGS_PATH;
 
-    const GUESTS_PATH = collection(db, 'artifacts', appId, 'public', 'data', 'banquet_guests');
-    const TAGS_PATH = doc(db, 'artifacts', appId, 'public', 'data', 'banquet_settings', 'table_tags');
+    // ตรวจสอบและเชื่อมต่อ Firebase เฉพาะเมื่อมีการตั้งค่า Config แล้วเท่านั้น
+    if (isCloudEnabled) {
+      try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        GUESTS_PATH = collection(db, 'artifacts', appId, 'public', 'data', 'banquet_guests');
+        TAGS_PATH = doc(db, 'artifacts', appId, 'public', 'data', 'banquet_settings', 'table_tags');
+      } catch (e) {
+        console.warn("Firebase Init Error - ข้ามไปใช้โหมด Local", e);
+      }
+    }
 
     window.addEventListener('DOMContentLoaded', async () => {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          currentUser = (await signInWithCustomToken(auth, __initial_auth_token)).user;
-        } else {
-          currentUser = (await signInAnonymously(auth)).user;
+      // เปิดใช้งานเมาส์และนิ้วสำหรับแพนและซูมผังโต๊ะ
+      if(typeof initMapZoomPan === 'function') initMapZoomPan(); 
+      
+      if (isCloudEnabled && auth) {
+        try {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            currentUser = (await signInWithCustomToken(auth, __initial_auth_token)).user;
+          } else {
+            currentUser = (await signInAnonymously(auth)).user;
+          }
+          setupFirestoreListeners();
+        } catch (err) {
+          console.warn("Auth Failed - เข้าสู่โหมด Offline.");
+          loadLocalFallback();
         }
-        setupFirestoreListeners();
-      } catch (err) {
-        console.warn("เข้าสู่โหมด Offline Fallback.");
+      } else {
+        console.warn("ไม่พบ Config - เริ่มต้นทำงานในโหมดออฟไลน์ (Local Storage)");
         loadLocalFallback();
       }
-      initMapZoomPan();
     });
 
     function setupFirestoreListeners() {
@@ -641,60 +663,116 @@
         snapshot.forEach(docSnap => freshGuests.push({ id: docSnap.id, ...docSnap.data() }));
         window.guests = freshGuests.sort((a, b) => a.id.localeCompare(b.id));
         localStorage.setItem('banquet_guests_fallback', JSON.stringify(window.guests));
-        triggerUIUpdates();
+        if(typeof triggerUIUpdates === 'function') triggerUIUpdates();
       }, err => { loadLocalFallback(); });
 
       onSnapshot(TAGS_PATH, (docSnap) => {
         if (docSnap.exists()) {
           window.tableCustomTags = docSnap.data();
+          localStorage.setItem('banquet_tags_fallback', JSON.stringify(window.tableCustomTags));
         } else {
           window.tableCustomTags = { ...DEFAULT_TABLE_TAGS };
-          if(currentUser) setDoc(TAGS_PATH, DEFAULT_TABLE_TAGS);
+          setDoc(TAGS_PATH, DEFAULT_TABLE_TAGS).catch(()=>{});
         }
-        window.renderTablesOnSvg();
-        window.populateTableGroupAdminList();
+        if(typeof window.renderTablesOnSvg === 'function') window.renderTablesOnSvg();
+        if(typeof window.populateTableGroupAdminList === 'function') window.populateTableGroupAdminList();
+        if(typeof window.populateDropdowns === 'function') window.populateDropdowns();
       }, err => console.warn(err));
     }
 
+    // ================= ฟังก์ชันสำหรับโหมดออฟไลน์ (ไม่มีอินเทอร์เน็ต / GitHub) =================
     function loadLocalFallback() {
-      const saved = localStorage.getItem('banquet_guests_fallback');
-      if (saved) {
-        try { window.guests = JSON.parse(saved); } catch(e){}
+      // ดึงรายชื่อแขก
+      const savedGuests = localStorage.getItem('banquet_guests_fallback');
+      if (savedGuests) {
+        try { window.guests = JSON.parse(savedGuests); } catch(e){}
       }
       
-      // บังคับสั่งอัปเดต UI เสมอ เพื่อให้ระบบวาดโต๊ะและใส่ข้อมูลใน Dropdown แม้จะยังไม่มีรายชื่อแขกเลยก็ตาม
-      triggerUIUpdates();
+      // ดึงชื่อกลุ่มโต๊ะ (Tags)
+      const savedTags = localStorage.getItem('banquet_tags_fallback');
+      if (savedTags) {
+        try { window.tableCustomTags = JSON.parse(savedTags); } catch(e){}
+      } else {
+        window.tableCustomTags = { ...DEFAULT_TABLE_TAGS };
+      }
+      
+      // วาด UI ทั้งหมดทันที
+      if(typeof triggerUIUpdates === 'function') triggerUIUpdates();
 
-      document.getElementById('syncText').innerText = 'ทำงานแบบออฟไลน์';
-      document.getElementById('onlineSyncBadge').className = 'inline-flex items-center gap-1.5 text-xs bg-rose-950/80 text-rose-400 px-2.5 py-0.5 rounded-full shadow-xs';
+      // เปลี่ยนสถานะมุมขวาบน
+      const syncText = document.getElementById('syncText');
+      const syncBadge = document.getElementById('onlineSyncBadge');
+      if(syncText) syncText.innerText = 'ใช้งานแบบออฟไลน์ (บันทึกในเครื่อง)';
+      if(syncBadge) syncBadge.className = 'inline-flex items-center gap-1.5 text-xs bg-rose-950/80 text-rose-400 px-2.5 py-0.5 rounded-full border border-rose-500/40 font-medium shadow-xs';
     }
 
+    // ================= ระบบบันทึกข้อมูลแบบ Hybrid (ยิง Cloud ถ้ามี / เซฟลงเครื่องถ้าไม่มี) =================
+    
+    // 1. เพิ่ม/แก้ไข รายชื่อแขก
     window.dbSaveGuest = async (obj) => { 
-      if(currentUser) { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', obj.id), obj); }
-      else { window.guests.push(obj); saveLocal(); triggerUIUpdates(); }
+      if(currentUser && db) { 
+        try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', obj.id), obj); } catch(e) { fallbackSaveGuest(obj); }
+      } else { fallbackSaveGuest(obj); }
     };
+    function fallbackSaveGuest(obj) {
+      const idx = window.guests.findIndex(x => x.id === obj.id);
+      if(idx >= 0) window.guests[idx] = obj; else window.guests.push(obj);
+      saveLocalGuests(); if(typeof triggerUIUpdates === 'function') triggerUIUpdates();
+    }
+
+    // 2. เช็คอิน / ยกเลิกเช็คอิน
     window.dbUpdateCheckin = async (id, status, time) => { 
-      if(currentUser) { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', id), {checkedIn: status, checkinTime: time}); }
-      else { let g = window.guests.find(x=>x.id===id); if(g) { g.checkedIn=status; g.checkinTime=time; saveLocal(); triggerUIUpdates(); } }
+      if(currentUser && db) { 
+        try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', id), {checkedIn: status, checkinTime: time}); } catch(e) { fallbackUpdateCheckin(id, status, time); }
+      } else { fallbackUpdateCheckin(id, status, time); }
     };
+    function fallbackUpdateCheckin(id, status, time) {
+      let g = window.guests.find(x=>x.id===id); 
+      if(g) { g.checkedIn=status; g.checkinTime=time; saveLocalGuests(); if(typeof triggerUIUpdates === 'function') triggerUIUpdates(); }
+    }
+
+    // 3. ลบแขก
     window.dbDeleteGuest = async (id) => { 
-      if(currentUser) { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', id)); }
-      else { window.guests = window.guests.filter(x=>x.id!==id); saveLocal(); triggerUIUpdates(); }
+      if(currentUser && db) { 
+        try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', id)); } catch(e) { fallbackDeleteGuest(id); }
+      } else { fallbackDeleteGuest(id); }
     };
+    function fallbackDeleteGuest(id) {
+      window.guests = window.guests.filter(x=>x.id!==id); 
+      saveLocalGuests(); if(typeof triggerUIUpdates === 'function') triggerUIUpdates();
+    }
+
+    // 4. ตั้งชื่อกลุ่มโต๊ะ (Tags)
     window.dbSaveTableTags = async (tagsObj) => { 
-      if(currentUser) { await setDoc(TAGS_PATH, tagsObj); }
+      if(currentUser && db) { 
+        try { await setDoc(TAGS_PATH, tagsObj); } catch(e) { fallbackSaveTags(tagsObj); }
+      } else { fallbackSaveTags(tagsObj); }
     };
+    function fallbackSaveTags(tagsObj) {
+      window.tableCustomTags = tagsObj;
+      localStorage.setItem('banquet_tags_fallback', JSON.stringify(tagsObj));
+      if(typeof triggerUIUpdates === 'function') triggerUIUpdates();
+    }
+
+    // 5. บันทึกข้อมูลทีละมากๆ (จำลองข้อมูล / นำเข้า Excel / ล้างข้อมูล)
     window.dbBatchReplaceGuests = async (list) => {
-      if(currentUser) {
-        const batch = writeBatch(db);
-        window.guests.forEach(g => batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', g.id)));
-        list.forEach(g => batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', g.id), g));
-        await batch.commit();
+      if(currentUser && db) {
+        try {
+          const batch = writeBatch(db);
+          window.guests.forEach(g => batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', g.id)));
+          list.forEach(g => batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', g.id), g));
+          await batch.commit();
+        } catch(e) { fallbackBatchReplace(list); }
       } else {
-        window.guests = list; saveLocal(); triggerUIUpdates();
+        fallbackBatchReplace(list);
       }
     };
-    function saveLocal() { localStorage.setItem('banquet_guests_fallback', JSON.stringify(window.guests)); }
+    function fallbackBatchReplace(list) {
+      window.guests = list; saveLocalGuests(); if(typeof triggerUIUpdates === 'function') triggerUIUpdates();
+    }
+
+    // เครื่องมือบันทึกลงเครื่อง
+    function saveLocalGuests() { localStorage.setItem('banquet_guests_fallback', JSON.stringify(window.guests)); }
   </script>
 
   <script>
