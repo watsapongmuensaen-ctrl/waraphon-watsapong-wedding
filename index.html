@@ -67,7 +67,6 @@
     .table-node {
       transition: all 0.2s ease-in-out;
       cursor: pointer;
-      /* ป้องกันการสั่นเวลา Hover โดยใช้จุดศูนย์กลางของรูป */
       transform-box: fill-box;
       transform-origin: center;
     }
@@ -110,13 +109,12 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-lg md:text-xl font-bold tracking-wide text-pink-50">แผนผังที่นั่งงานเลี้ยงฉลองมงคลสมรส</h1>
-            <!-- Real-time Online Sync Indicator Badge -->
-            <span id="onlineSyncBadge" class="inline-flex items-center gap-1.5 text-xs bg-emerald-950/80 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/40 font-medium shadow-xs">
+            <span id="onlineSyncBadge" class="inline-flex items-center gap-1.5 text-xs bg-pink-950/80 text-pink-300 px-2.5 py-0.5 rounded-full border border-pink-500/40 font-medium shadow-xs">
               <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
               </span>
-              <span id="syncText">เชื่อมต่อสด (Real-Time)</span>
+              <span id="syncText">โหมดออฟไลน์ (พร้อมใช้งาน GitHub)</span>
             </span>
           </div>
           <p class="text-xs text-pink-200">ระบบเช็คอินและค้นหาที่นั่ง (รองรับ 232 ท่าน)</p>
@@ -537,14 +535,13 @@
   </div>
 
   <script>
-    // 29 Tables: 5 Small, 24 Large (8 Rows x 3 Cols). Total 232 Seats.
-    // Use var instead of const to avoid "already been declared" in live server environments
+    // 29 Tables Config
     var TABLES_CONFIG = [
-      { id: 'S1', name: 'โต๊ะ S1', room: 'small', svgX: 445, svgY: 370, label: 'S1' },
-      { id: 'S2', name: 'โต๊ะ S2', room: 'small', svgX: 325, svgY: 415, label: 'S2' },
-      { id: 'S3', name: 'โต๊ะ S3', room: 'small', svgX: 445, svgY: 460, label: 'S3' },
-      { id: 'S4', name: 'โต๊ะ S4', room: 'small', svgX: 325, svgY: 505, label: 'S4' },
-      { id: 'S5', name: 'โต๊ะ S5', room: 'small', svgX: 445, svgY: 550, label: 'S5' },
+      { id: 'S1', name: 'โต๊ะ S1', room: 'small', svgX: 445, svgY: 382, label: 'S1' },
+      { id: 'S2', name: 'โต๊ะ S2', room: 'small', svgX: 325, svgY: 425, label: 'S2' },
+      { id: 'S3', name: 'โต๊ะ S3', room: 'small', svgX: 445, svgY: 470, label: 'S3' },
+      { id: 'S4', name: 'โต๊ะ S4', room: 'small', svgX: 325, svgY: 515, label: 'S4' },
+      { id: 'S5', name: 'โต๊ะ S5', room: 'small', svgX: 445, svgY: 560, label: 'S5' },
       { id: 'L01', name: 'โต๊ะ 01', room: 'large', svgX: 595, svgY: 145, label: '01' },
       { id: 'L02', name: 'โต๊ะ 02', room: 'large', svgX: 595, svgY: 205, label: '02' },
       { id: 'L03', name: 'โต๊ะ 03', room: 'large', svgX: 595, svgY: 265, label: '03' },
@@ -601,181 +598,84 @@
     window.isDraggingMap = false;
     window.startMapX = 0;
     window.startMapY = 0;
-  </script>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    // 📌 ใส่ Firebase Config ของคุณที่นี่หากต้องการออนไลน์ข้อมูลพร้อมกันหลายเครื่อง
-    const myFirebaseConfig = {}; 
-    
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'banquet-app-github';
-    const isCloudEnabled = Object.keys(myFirebaseConfig).length > 0 || typeof __firebase_config !== 'undefined';
-    
-    // Config เปล่าสำหรับดักไม่ให้ Firebase SDK แจ้งเตือน Error จนแอปพัง
-    const fallbackConfig = { apiKey: "offline-key", projectId: "offline-project", appId: "1:123:web:123" };
-    const firebaseConfig = isCloudEnabled ? (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : myFirebaseConfig) : fallbackConfig;
-
-    let app, auth, db;
-    let currentUser = null;
-    let GUESTS_PATH, TAGS_PATH;
-
-    // ตรวจสอบและเชื่อมต่อ Firebase เฉพาะเมื่อมีการตั้งค่า Config แล้วเท่านั้น
-    if (isCloudEnabled) {
-      try {
-        app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
-        GUESTS_PATH = collection(db, 'artifacts', appId, 'public', 'data', 'banquet_guests');
-        TAGS_PATH = doc(db, 'artifacts', appId, 'public', 'data', 'banquet_settings', 'table_tags');
-      } catch (e) {
-        console.warn("Firebase Init Error - ข้ามไปใช้โหมด Local", e);
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      // เปิดใช้งานเมาส์และนิ้วสำหรับแพนและซูมผังโต๊ะ
-      if(typeof initMapZoomPan === 'function') initMapZoomPan(); 
-      
-      if (isCloudEnabled && auth) {
-        try {
-          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            currentUser = (await signInWithCustomToken(auth, __initial_auth_token)).user;
-          } else {
-            currentUser = (await signInAnonymously(auth)).user;
-          }
-          setupFirestoreListeners();
-        } catch (err) {
-          console.warn("Auth Failed - เข้าสู่โหมด Offline.");
-          loadLocalFallback();
-        }
-      } else {
-        console.warn("ไม่พบ Config - เริ่มต้นทำงานในโหมดออฟไลน์ (Local Storage)");
-        loadLocalFallback();
-      }
-    });
-
-    function setupFirestoreListeners() {
-      onSnapshot(GUESTS_PATH, (snapshot) => {
-        const freshGuests = [];
-        snapshot.forEach(docSnap => freshGuests.push({ id: docSnap.id, ...docSnap.data() }));
-        window.guests = freshGuests.sort((a, b) => a.id.localeCompare(b.id));
-        localStorage.setItem('banquet_guests_fallback', JSON.stringify(window.guests));
-        if(typeof triggerUIUpdates === 'function') triggerUIUpdates();
-      }, err => { loadLocalFallback(); });
-
-      onSnapshot(TAGS_PATH, (docSnap) => {
-        if (docSnap.exists()) {
-          window.tableCustomTags = docSnap.data();
-          localStorage.setItem('banquet_tags_fallback', JSON.stringify(window.tableCustomTags));
-        } else {
-          window.tableCustomTags = { ...DEFAULT_TABLE_TAGS };
-          setDoc(TAGS_PATH, DEFAULT_TABLE_TAGS).catch(()=>{});
-        }
-        if(typeof window.renderTablesOnSvg === 'function') window.renderTablesOnSvg();
-        if(typeof window.populateTableGroupAdminList === 'function') window.populateTableGroupAdminList();
-        if(typeof window.populateDropdowns === 'function') window.populateDropdowns();
-      }, err => console.warn(err));
-    }
-
-    // ================= ฟังก์ชันสำหรับโหมดออฟไลน์ (ไม่มีอินเทอร์เน็ต / GitHub) =================
-    function loadLocalFallback() {
-      // ดึงรายชื่อแขก
-      const savedGuests = localStorage.getItem('banquet_guests_fallback');
+    // Local Storage Data Engine (100% Offline & GitHub Compatible)
+    function loadLocalData() {
+      const savedGuests = localStorage.getItem('banquet_guests_data');
       if (savedGuests) {
-        try { window.guests = JSON.parse(savedGuests); } catch(e){}
+        try { window.guests = JSON.parse(savedGuests); } catch(e) { window.guests = []; }
+      } else {
+        // Auto seed 232 guests on first launch if empty
+        generateDefault232Guests();
       }
-      
-      // ดึงชื่อกลุ่มโต๊ะ (Tags)
-      const savedTags = localStorage.getItem('banquet_tags_fallback');
+
+      const savedTags = localStorage.getItem('banquet_tags_data');
       if (savedTags) {
-        try { window.tableCustomTags = JSON.parse(savedTags); } catch(e){}
+        try { window.tableCustomTags = JSON.parse(savedTags); } catch(e) { window.tableCustomTags = { ...DEFAULT_TABLE_TAGS }; }
       } else {
         window.tableCustomTags = { ...DEFAULT_TABLE_TAGS };
       }
-      
-      // วาด UI ทั้งหมดทันที
-      if(typeof triggerUIUpdates === 'function') triggerUIUpdates();
-
-      // เปลี่ยนสถานะมุมขวาบน
-      const syncText = document.getElementById('syncText');
-      const syncBadge = document.getElementById('onlineSyncBadge');
-      if(syncText) syncText.innerText = 'ใช้งานแบบออฟไลน์ (บันทึกในเครื่อง)';
-      if(syncBadge) syncBadge.className = 'inline-flex items-center gap-1.5 text-xs bg-rose-950/80 text-rose-400 px-2.5 py-0.5 rounded-full border border-rose-500/40 font-medium shadow-xs';
     }
 
-    // ================= ระบบบันทึกข้อมูลแบบ Hybrid (ยิง Cloud ถ้ามี / เซฟลงเครื่องถ้าไม่มี) =================
-    
-    // 1. เพิ่ม/แก้ไข รายชื่อแขก
-    window.dbSaveGuest = async (obj) => { 
-      if(currentUser && db) { 
-        try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', obj.id), obj); } catch(e) { fallbackSaveGuest(obj); }
-      } else { fallbackSaveGuest(obj); }
-    };
-    function fallbackSaveGuest(obj) {
+    function saveLocalData() {
+      localStorage.setItem('banquet_guests_data', JSON.stringify(window.guests));
+      localStorage.setItem('banquet_tags_data', JSON.stringify(window.tableCustomTags));
+      triggerUIUpdates();
+    }
+
+    function generateDefault232Guests() {
+      const mock = []; let c = 0;
+      TABLES_CONFIG.forEach(t => {
+        for(let i=0; i<8; i++) {
+          c++;
+          mock.push({
+            id: 'G'+String(c).padStart(3,'0'), 
+            name: `คุณ${FIRST_NAMES[c%10]} ${LAST_NAMES[c%10]}`,
+            nickname: NICKNAMES[c%10], 
+            tableId: t.id, 
+            checkedIn: c%4===0, 
+            checkinTime: c%4===0 ? '18:30':null, 
+            notes: ''
+          });
+        }
+      });
+      window.guests = mock;
+      localStorage.setItem('banquet_guests_data', JSON.stringify(window.guests));
+    }
+
+    // Hybrid Storage Methods
+    window.dbSaveGuest = async (obj) => {
       const idx = window.guests.findIndex(x => x.id === obj.id);
       if(idx >= 0) window.guests[idx] = obj; else window.guests.push(obj);
-      saveLocalGuests(); if(typeof triggerUIUpdates === 'function') triggerUIUpdates();
-    }
-
-    // 2. เช็คอิน / ยกเลิกเช็คอิน
-    window.dbUpdateCheckin = async (id, status, time) => { 
-      if(currentUser && db) { 
-        try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', id), {checkedIn: status, checkinTime: time}); } catch(e) { fallbackUpdateCheckin(id, status, time); }
-      } else { fallbackUpdateCheckin(id, status, time); }
+      saveLocalData();
     };
-    function fallbackUpdateCheckin(id, status, time) {
-      let g = window.guests.find(x=>x.id===id); 
-      if(g) { g.checkedIn=status; g.checkinTime=time; saveLocalGuests(); if(typeof triggerUIUpdates === 'function') triggerUIUpdates(); }
-    }
 
-    // 3. ลบแขก
-    window.dbDeleteGuest = async (id) => { 
-      if(currentUser && db) { 
-        try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', id)); } catch(e) { fallbackDeleteGuest(id); }
-      } else { fallbackDeleteGuest(id); }
+    window.dbUpdateCheckin = async (id, status, time) => {
+      let g = window.guests.find(x => x.id === id);
+      if(g) { g.checkedIn = status; g.checkinTime = time; saveLocalData(); }
     };
-    function fallbackDeleteGuest(id) {
-      window.guests = window.guests.filter(x=>x.id!==id); 
-      saveLocalGuests(); if(typeof triggerUIUpdates === 'function') triggerUIUpdates();
-    }
 
-    // 4. ตั้งชื่อกลุ่มโต๊ะ (Tags)
-    window.dbSaveTableTags = async (tagsObj) => { 
-      if(currentUser && db) { 
-        try { await setDoc(TAGS_PATH, tagsObj); } catch(e) { fallbackSaveTags(tagsObj); }
-      } else { fallbackSaveTags(tagsObj); }
+    window.dbDeleteGuest = async (id) => {
+      window.guests = window.guests.filter(x => x.id !== id);
+      saveLocalData();
     };
-    function fallbackSaveTags(tagsObj) {
+
+    window.dbSaveTableTags = async (tagsObj) => {
       window.tableCustomTags = tagsObj;
-      localStorage.setItem('banquet_tags_fallback', JSON.stringify(tagsObj));
-      if(typeof triggerUIUpdates === 'function') triggerUIUpdates();
-    }
-
-    // 5. บันทึกข้อมูลทีละมากๆ (จำลองข้อมูล / นำเข้า Excel / ล้างข้อมูล)
-    window.dbBatchReplaceGuests = async (list) => {
-      if(currentUser && db) {
-        try {
-          const batch = writeBatch(db);
-          window.guests.forEach(g => batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', g.id)));
-          list.forEach(g => batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', g.id), g));
-          await batch.commit();
-        } catch(e) { fallbackBatchReplace(list); }
-      } else {
-        fallbackBatchReplace(list);
-      }
+      saveLocalData();
     };
-    function fallbackBatchReplace(list) {
-      window.guests = list; saveLocalGuests(); if(typeof triggerUIUpdates === 'function') triggerUIUpdates();
-    }
 
-    // เครื่องมือบันทึกลงเครื่อง
-    function saveLocalGuests() { localStorage.setItem('banquet_guests_fallback', JSON.stringify(window.guests)); }
-  </script>
+    window.dbBatchReplaceGuests = async (list) => {
+      window.guests = list;
+      saveLocalData();
+    };
 
-  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      loadLocalData();
+      initMapZoomPan();
+      triggerUIUpdates();
+    });
+
     function triggerUIUpdates() {
       window.updateDashboardStats();
       window.renderTablesOnSvg();
@@ -798,6 +698,7 @@
 
     window.populateDropdowns = function() {
       const tagSelect = document.getElementById('groupTagFilterSelect');
+      if(!tagSelect) return;
       const curTag = tagSelect.value;
       tagSelect.innerHTML = '<option value="all">🏷️ ทุกกลุ่มโต๊ะ</option>';
       Array.from(new Set(Object.values(window.tableCustomTags))).filter(Boolean).forEach(tag => {
@@ -806,6 +707,7 @@
       tagSelect.value = Array.from(tagSelect.options).some(o=>o.value===curTag) ? curTag : 'all';
 
       const fastSelect = document.getElementById('fastTableSearchSelect');
+      if(!fastSelect) return;
       const curFast = fastSelect.value;
       fastSelect.innerHTML = '<option value="">🎯 -- คลิกเพื่อค้นหาและเลือกชื่อโต๊ะ --</option>';
       TABLES_CONFIG.forEach(t => {
@@ -905,11 +807,13 @@
       document.getElementById('btnClearSearch').classList.toggle('hidden', q.length === 0);
       window.renderGuestList(q);
     };
+
     window.clearSearch = function() {
       document.getElementById('searchInput').value = '';
       window.handleSearch();
       window.resetMapView();
     };
+
     window.setFilter = function(type) {
       window.currentFilter = type;
       ['all', 'small', 'large', 'unchecked'].forEach(f => {
@@ -919,6 +823,7 @@
       });
       window.handleSearch();
     };
+
     window.handleGroupTagFilterChange = function() { window.handleSearch(); };
 
     window.renderGuestList = function(query = '') {
@@ -1000,6 +905,7 @@
       await window.dbUpdateCheckin(id, !g.checkedIn, !g.checkedIn ? new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) : null);
       showToast(!g.checkedIn ? `ยกเลิกเช็คอินแล้ว` : `เช็คอินคุณ ${g.name} แล้ว`);
     };
+
     window.toggleCheckinCurrent = () => { if(window.selectedGuestId) window.toggleCheckin(window.selectedGuestId); };
 
     window.handleTableClick = function(id) {
@@ -1027,6 +933,7 @@
       
       document.getElementById('tableDetailsModal').classList.remove('hidden');
     };
+
     window.closeTableModal = () => document.getElementById('tableDetailsModal').classList.add('hidden');
 
     window.openDirectAddGuestModal = () => {
@@ -1037,6 +944,7 @@
       document.getElementById('directAddNickname').value = '';
       document.getElementById('directAddGuestModal').classList.remove('hidden');
     };
+
     window.closeDirectAddGuestModal = () => document.getElementById('directAddGuestModal').classList.add('hidden');
 
     window.handleConfirmDirectAddGuest = async (e) => {
@@ -1055,7 +963,7 @@
         checkinTime: new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})
       };
       
-      if (window.dbSaveGuest) await window.dbSaveGuest(newG);
+      await window.dbSaveGuest(newG);
       window.closeDirectAddGuestModal();
       showToast(`เพิ่มคุณ ${name} เข้าโต๊ะเรียบร้อยแล้ว`);
     };
@@ -1074,12 +982,11 @@
         checkedIn: true,
         checkinTime: new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})
       };
-      if (window.dbSaveGuest) await window.dbSaveGuest(newG);
+      await window.dbSaveGuest(newG);
       showToast(`เพิ่มแขก Walk-in เข้าโต๊ะเรียบร้อยแล้ว`);
     };
-  </script>
 
-  <script>
+    // Map Zoom & Pan Control
     function initMapZoomPan() {
       const svgContainer = document.getElementById('svgContainer');
       svgContainer.addEventListener('wheel', (e) => {
@@ -1151,9 +1058,8 @@
       window.mapPanY = (h / 2) - (table.svgY * window.mapScale);
       applyMapTransform();
     };
-  </script>
 
-  <script>
+    // Admin & Bulk Modal Logic
     window.openAdminModal = () => {
       window.populateTableDropdown();
       window.populateTableGroupAdminList();
@@ -1194,7 +1100,7 @@
         const input = document.getElementById(`adminTableTagInput_${t.id}`);
         if (input) { window.tableCustomTags[t.id] = input.value.trim() || 'ทั่วไป'; }
       });
-      if (window.dbSaveTableTags) { await window.dbSaveTableTags(window.tableCustomTags); }
+      await window.dbSaveTableTags(window.tableCustomTags);
       showToast('บันทึกชื่อกลุ่มโต๊ะทั้งหมดเรียบร้อยแล้ว');
       window.closeAdminModal();
     };
@@ -1222,7 +1128,7 @@
         notes: document.getElementById('addNotes').value.trim(),
         checkedIn: false, checkinTime: null
       };
-      if (window.dbSaveGuest) await window.dbSaveGuest(newG);
+      await window.dbSaveGuest(newG);
       document.getElementById('addGuestForm').reset();
       showToast('เพิ่มรายชื่อคุณ ' + name + ' เรียบร้อยแล้ว');
     };
@@ -1243,7 +1149,7 @@
         }
         newG.push({ id:'G'+Date.now()+i, name: p[0], nickname: p[1]||'', tableId: tId, checkedIn: false, checkinTime: null, notes: '' });
       });
-      if(newG.length && window.dbBatchReplaceGuests) {
+      if(newG.length) {
         await window.dbBatchReplaceGuests(newG);
         showToast(`นำเข้า ${newG.length} รายชื่อแล้ว`);
         window.closeAdminModal();
@@ -1253,25 +1159,17 @@
 
     window.generate232MockGuestsPrompt = () => {
       window.showConfirmModal('สร้าง 232 รายชื่อ', 'ยืนยันการสร้างข้อมูลจำลองแบบเต็มความจุ?', async () => {
-        const mock = []; let c = 0;
-        TABLES_CONFIG.forEach(t => {
-          for(let i=0; i<8; i++) {
-            c++;
-            mock.push({
-              id: 'G'+String(c).padStart(3,'0'), name: `คุณ${FIRST_NAMES[c%10]} ${LAST_NAMES[c%10]}`,
-              nickname: NICKNAMES[c%10], tableId: t.id, checkedIn: c%3===0, checkinTime: c%3===0 ? '18:30':null, notes: ''
-            });
-          }
-        });
-        await window.dbBatchReplaceGuests(mock);
-        window.closeAdminModal(); showToast('สร้าง 232 รายชื่อเรียบร้อยแล้ว');
+        generateDefault232Guests();
+        window.closeAdminModal(); 
+        showToast('สร้าง 232 รายชื่อเรียบร้อยแล้ว');
       });
     };
 
     window.clearAllGuestDataPrompt = () => {
       window.showConfirmModal('ล้างข้อมูล', 'ต้องการลบข้อมูลแขกทั้งหมดทิ้งหรือไม่?', async () => {
         await window.dbBatchReplaceGuests([]);
-        window.closeAdminModal(); showToast('ล้างข้อมูลทั้งหมดแล้ว');
+        window.closeAdminModal(); 
+        showToast('ล้างข้อมูลทั้งหมดแล้ว');
       });
     };
 
@@ -1294,11 +1192,13 @@
     };
     window.closeConfirmModal = () => document.getElementById('customConfirmModal').classList.add('hidden');
     window.executeConfirmAction = () => { window.closeConfirmModal(); if(window.pendingConfirmCallback) window.pendingConfirmCallback(); };
+    
     window.showToast = (msg, icon='fa-check-circle') => {
       document.getElementById('toastMessage').innerText = msg;
       const t = document.getElementById('toastNotification');
       t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 3000);
     };
+
     window.toggleGuestListCollapse = () => {
       window.isGuestListCollapsed = !window.isGuestListCollapsed;
       document.getElementById('guestListContainer').classList.toggle('hidden', window.isGuestListCollapsed);
@@ -1306,6 +1206,7 @@
     };
     
     window.deleteGuestPrompt = (id) => window.showConfirmModal('ลบแขก', 'ยืนยันการถอดรายชื่อนี้?', async () => { await window.dbDeleteGuest(id); window.showToast('ลบเรียบร้อย'); });
+    window.switchTab = (t) => { if(t==='admin') window.openAdminModal(); };
   </script>
 </body>
 </html>
