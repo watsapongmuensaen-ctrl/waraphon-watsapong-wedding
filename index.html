@@ -21,11 +21,11 @@
           fontFamily: { sans: ['Kanit', 'sans-serif'] },
           colors: {
             brand: {
-              50: '#fdf2f8', // pink-50
-              100: '#fce7f3', // pink-100
-              500: '#db2777', // pink-600 (Burgundy tint)
-              600: '#be185d', // pink-700
-              700: '#9d174d', // pink-800
+              50: '#fdf2f8', 
+              100: '#fce7f3', 
+              500: '#db2777', 
+              600: '#be185d', 
+              700: '#9d174d', 
             }
           }
         }
@@ -67,7 +67,7 @@
     .table-node {
       transition: all 0.2s ease-in-out;
       cursor: pointer;
-      /* FIX: ป้องกันการสั่นเวลา Hover โดยใช้จุดศูนย์กลางของรูป */
+      /* ป้องกันการสั่นเวลา Hover โดยใช้จุดศูนย์กลางของรูป */
       transform-box: fill-box;
       transform-origin: center;
     }
@@ -162,7 +162,7 @@
       <!-- Search Input Card -->
       <div class="bg-white/90 backdrop-blur p-4 rounded-2xl shadow-sm border border-pink-100 flex flex-col gap-3">
         
-        <!-- NEW: Fast Table Selection Dropdown -->
+        <!-- Fast Table Selection Dropdown -->
         <label for="fastTableSearchSelect" class="text-sm font-semibold text-pink-800 flex items-center justify-between">
           <span><i class="fa-solid fa-location-crosshairs text-pink-500 me-1.5"></i> ค้นหาตำแหน่งโต๊ะบนผังด่วน</span>
         </label>
@@ -223,15 +223,8 @@
               <span id="hlCheckinTime" class="text-[11px] text-slate-400 mt-1">ยังไม่ได้ลงทะเบียน</span>
             </div>
           </div>
-
           <!-- Quick Action Buttons for Highlighted Guest -->
           <div class="pt-2 border-t border-pink-100 flex items-center justify-end gap-2 text-xs">
-            <button onclick="openMoveTableModal(selectedGuestId)" class="px-2.5 py-1 bg-pink-50 hover:bg-pink-100 text-pink-700 font-semibold rounded-lg transition flex items-center gap-1">
-              <i class="fa-solid fa-arrow-right-arrow-left"></i> ย้ายโต๊ะ
-            </button>
-            <button onclick="openEditGuestModal(selectedGuestId)" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 font-semibold rounded-lg transition flex items-center gap-1">
-              <i class="fa-solid fa-pen-to-square"></i> แก้ไขชื่อ
-            </button>
             <button onclick="deleteGuestPrompt(selectedGuestId)" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold rounded-lg transition flex items-center gap-1">
               <i class="fa-solid fa-user-minus"></i> ถอดชื่อ
             </button>
@@ -252,17 +245,14 @@
             </span>
           </div>
         </div>
-
         <div id="guestListContainer" class="p-2 overflow-y-auto max-h-[380px] divide-y divide-pink-50 transition-all duration-300">
           <!-- Populated by JavaScript -->
         </div>
       </div>
-
     </section>
 
     <!-- RIGHT PANEL: Floor Plan Map -->
     <section id="panel-right" class="lg:col-span-7 flex flex-col gap-3 relative">
-      
       <div class="bg-white/95 backdrop-blur p-3 md:p-4 rounded-2xl shadow-sm border border-pink-200 flex flex-col flex-1 relative">
         <!-- Map Toolbar Header -->
         <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-pink-100">
@@ -274,7 +264,6 @@
               รวม 29 โต๊ะ (232 ท่าน)
             </span>
           </div>
-
           <div class="flex items-center space-x-2 text-xs font-medium text-slate-600">
             <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span> ครบ 8 คน</span>
             <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-pink-300 inline-block"></span> มีคนนั่ง</span>
@@ -291,7 +280,6 @@
 
         <!-- SVG Map Container (Pan and Zoom enabled) -->
         <div id="svgContainer" class="relative w-full bg-slate-900 rounded-xl overflow-hidden border border-slate-700 p-0 flex items-center justify-center min-h-[550px] cursor-grab active:cursor-grabbing shadow-inner">
-          
           <svg id="banquetSvgMap" viewBox="0 0 1000 700" class="w-full h-auto max-h-[700px] drop-shadow-md select-none touch-none">
             <defs>
               <pattern id="gridPattern" width="30" height="30" patternUnits="userSpaceOnUse">
@@ -301,24 +289,21 @@
                 <feDropShadow dx="2" dy="4" stdDeviation="4" flood-opacity="0.15"/>
               </filter>
             </defs>
-
-            <!-- Background Grid (Catch events) -->
             <rect width="1000" height="700" fill="#0f172a" />
             <rect width="1000" height="700" fill="url(#gridPattern)" />
 
             <!-- ZOOM WRAPPER -->
             <g id="mapZoomWrapper" transform="translate(0,0) scale(1)">
               
-              <!-- ================= Outer Grounds ================= -->
+              <!-- Outer Grounds -->
               <g id="outerGrounds">
                 <path d="M 80 680 Q 110 650 140 680 Q 170 650 200 680 Q 230 650 260 680 Q 290 650 320 680 Q 350 650 380 680 Q 410 650 440 680 Q 470 650 500 680 Q 530 650 560 680" fill="#064e3b" stroke="#065f46" stroke-width="2"/>
               </g>
 
-              <!-- ================= SMALL BANQUET ROOM ================= -->
+              <!-- SMALL BANQUET ROOM -->
               <g id="smallRoomGroup">
                 <rect x="80" y="320" width="430" height="280" fill="#ffffff" stroke="#fbcfe8" stroke-width="6" rx="8" />
                 <text x="360" y="345" font-size="16" font-weight="bold" fill="#9d174d" text-anchor="middle">ห้องจัดเลี้ยงห้องเล็ก (S1-S5)</text>
-
                 <!-- Toilet Section -->
                 <g id="toiletArea">
                   <rect x="10" y="355" width="60" height="110" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" rx="4"/>
@@ -326,7 +311,6 @@
                   <rect x="10" y="475" width="60" height="110" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" rx="4"/>
                   <text x="40" y="535" font-size="12" font-weight="bold" fill="#64748b" text-anchor="middle">ห้องน้ำ</text>
                 </g>
-
                 <!-- Photo Backdrop Area -->
                 <g id="smallStage">
                   <rect x="160" y="360" width="80" height="195" fill="#fdf2f8" stroke="#fbcfe8" stroke-width="2" rx="4"/>
@@ -334,17 +318,15 @@
                 </g>
               </g>
 
-              <!-- ================= LARGE BANQUET ROOM ================= -->
+              <!-- LARGE BANQUET ROOM -->
               <g id="largeRoomGroup">
                 <rect x="510" y="60" width="370" height="540" fill="#ffffff" stroke="#fbcfe8" stroke-width="6" rx="8" />
                 <text x="535" y="350" font-size="20" font-weight="bold" fill="#9d174d" text-anchor="middle" transform="rotate(-90, 535, 350)">ห้องจัดเลี้ยงห้องใหญ่ (โต๊ะ 01 - 24)</text>
-
                 <!-- Main Stage -->
                 <g id="largeStage">
                   <rect x="560" y="68" width="270" height="40" fill="#fdf2f8" stroke="#fbcfe8" stroke-width="2" rx="4"/>
                   <text x="695" y="93" font-size="14" font-weight="bold" fill="#db2777" text-anchor="middle">เวทีหลัก (STAGE)</text>
                 </g>
-
                 <!-- Ramp Area -->
                 <rect x="880" y="160" width="45" height="400" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" rx="4"/>
                 <text x="902" y="360" font-size="12" font-weight="bold" fill="#64748b" text-anchor="middle" transform="rotate(-90, 902, 360)">ทางเดิน / RAMP</text>
@@ -362,7 +344,6 @@
             </g> <!-- End Zoom Wrapper -->
           </svg>
         </div>
-        
         <p class="text-center text-xs text-slate-400 mt-2">
           <i class="fa-solid fa-magnifying-glass-plus me-1"></i> ใช้เมาส์หรือนิ้วเลื่อน/ซูมย่อขยายผังได้อิสระ
         </p>
@@ -478,20 +459,6 @@
     </div>
   </div>
 
-  <!-- Modals for On-Site Actions -->
-  <!-- Custom Confirm -->
-  <div id="customConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center">
-      <div class="w-12 h-12 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center mx-auto text-xl font-bold mb-3"><i class="fa-solid fa-question"></i></div>
-      <h4 id="confirmModalTitle" class="font-bold text-slate-800 text-base">ยืนยัน</h4>
-      <p id="confirmModalMessage" class="text-xs text-slate-500 mt-1 mb-4">คุณต้องการทำรายการนี้หรือไม่?</p>
-      <div class="flex gap-2">
-        <button onclick="closeConfirmModal(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl w-1/2">ยกเลิก</button>
-        <button id="btnConfirmAction" onclick="executeConfirmAction()" class="px-4 py-2 bg-pink-600 text-white font-bold text-xs rounded-xl w-1/2">ยืนยัน</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Table Details Modal -->
   <div id="tableDetailsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full flex flex-col max-h-[85vh]">
@@ -517,7 +484,7 @@
     </div>
   </div>
 
-  <!-- SIMPLE DIRECT ADD GUEST TO SPECIFIC TABLE MODAL -->
+  <!-- DIRECT ADD GUEST MODAL -->
   <div id="directAddGuestModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[55] hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-pink-100 p-5 space-y-4">
       <div class="flex items-center justify-between border-b pb-3 border-pink-100">
@@ -527,9 +494,7 @@
           </h4>
           <p id="directAddTableLabel" class="text-xs text-pink-600 font-bold mt-0.5">โต๊ะ S1</p>
         </div>
-        <button onclick="closeDirectAddGuestModal()" class="text-slate-400 hover:text-pink-600">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <button onclick="closeDirectAddGuestModal()" class="text-slate-400 hover:text-pink-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <form onsubmit="handleConfirmDirectAddGuest(event)" class="space-y-3">
         <div>
@@ -550,14 +515,15 @@
     </div>
   </div>
 
-  <!-- Move Guest Modal -->
-  <div id="moveTableModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-5 w-full max-w-sm">
-      <h4 class="font-bold border-b pb-2 mb-3">ย้ายโต๊ะ <button onclick="closeMoveTableModal()" class="float-right text-slate-400"><i class="fa-solid fa-xmark"></i></button></h4>
-      <p id="moveGuestName" class="font-bold text-pink-700"></p>
-      <select id="moveTargetTableSelect" class="w-full mt-3 p-2 border rounded focus:ring-2 focus:ring-pink-500"></select>
-      <div class="mt-4 text-right">
-        <button onclick="confirmMoveGuest()" class="px-4 py-2 bg-pink-600 text-white rounded font-bold text-xs">ยืนยันการย้าย</button>
+  <!-- Custom Confirm Modal -->
+  <div id="customConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center">
+      <div class="w-12 h-12 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center mx-auto text-xl font-bold mb-3"><i class="fa-solid fa-question"></i></div>
+      <h4 id="confirmModalTitle" class="font-bold text-slate-800 text-base">ยืนยัน</h4>
+      <p id="confirmModalMessage" class="text-xs text-slate-500 mt-1 mb-4">คุณต้องการทำรายการนี้หรือไม่?</p>
+      <div class="flex gap-2">
+        <button onclick="closeConfirmModal(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl w-1/2">ยกเลิก</button>
+        <button id="btnConfirmAction" onclick="executeConfirmAction()" class="px-4 py-2 bg-pink-600 text-white font-bold text-xs rounded-xl w-1/2">ยืนยัน</button>
       </div>
     </div>
   </div>
@@ -573,14 +539,11 @@
   <script>
     // 29 Tables: 5 Small, 24 Large (8 Rows x 3 Cols). Total 232 Seats.
     const TABLES_CONFIG = [
-      // Small Room (Zigzag balanced layout)
       { id: 'S1', name: 'โต๊ะ S1', room: 'small', svgX: 445, svgY: 370, label: 'S1' },
       { id: 'S2', name: 'โต๊ะ S2', room: 'small', svgX: 325, svgY: 415, label: 'S2' },
       { id: 'S3', name: 'โต๊ะ S3', room: 'small', svgX: 445, svgY: 460, label: 'S3' },
       { id: 'S4', name: 'โต๊ะ S4', room: 'small', svgX: 325, svgY: 505, label: 'S4' },
       { id: 'S5', name: 'โต๊ะ S5', room: 'small', svgX: 445, svgY: 550, label: 'S5' },
-      
-      // Large Room (Column 1 - Centered at X: 595, evenly spaced Y: 145 to 565)
       { id: 'L01', name: 'โต๊ะ 01', room: 'large', svgX: 595, svgY: 145, label: '01' },
       { id: 'L02', name: 'โต๊ะ 02', room: 'large', svgX: 595, svgY: 205, label: '02' },
       { id: 'L03', name: 'โต๊ะ 03', room: 'large', svgX: 595, svgY: 265, label: '03' },
@@ -589,8 +552,6 @@
       { id: 'L06', name: 'โต๊ะ 06', room: 'large', svgX: 595, svgY: 445, label: '06' },
       { id: 'L07', name: 'โต๊ะ 07', room: 'large', svgX: 595, svgY: 505, label: '07' },
       { id: 'L08', name: 'โต๊ะ 08', room: 'large', svgX: 595, svgY: 565, label: '08' },
-      
-      // Large Room (Column 2 - Centered at X: 695)
       { id: 'L09', name: 'โต๊ะ 09', room: 'large', svgX: 695, svgY: 145, label: '09' },
       { id: 'L10', name: 'โต๊ะ 10', room: 'large', svgX: 695, svgY: 205, label: '10' },
       { id: 'L11', name: 'โต๊ะ 11', room: 'large', svgX: 695, svgY: 265, label: '11' },
@@ -599,8 +560,6 @@
       { id: 'L14', name: 'โต๊ะ 14', room: 'large', svgX: 695, svgY: 445, label: '14' },
       { id: 'L15', name: 'โต๊ะ 15', room: 'large', svgX: 695, svgY: 505, label: '15' },
       { id: 'L16', name: 'โต๊ะ 16', room: 'large', svgX: 695, svgY: 565, label: '16' },
-      
-      // Large Room (Column 3 - Centered at X: 795)
       { id: 'L17', name: 'โต๊ะ 17', room: 'large', svgX: 795, svgY: 145, label: '17' },
       { id: 'L18', name: 'โต๊ะ 18', room: 'large', svgX: 795, svgY: 205, label: '18' },
       { id: 'L19', name: 'โต๊ะ 19', room: 'large', svgX: 795, svgY: 265, label: '19' },
@@ -625,21 +584,19 @@
     const LAST_NAMES = ["ใจดี", "รักสงบ", "ชัยชนะ", "สุขเสริฐ", "วงศ์สว่าง", "เลิศล้ำ", "บุญมา", "เจริญพร", "เด่นดวง", "สุขใจ"];
     const NICKNAMES = ["ชาย", "หญิง", "ชัย", "นันท์", "ภา", "ชา", "พร", "ตี้", "เมย์", "วรรณ"];
 
-    // GLOBAL VARIABLES
     window.guests = [];
     window.tableCustomTags = { ...DEFAULT_TABLE_TAGS };
     window.selectedGuestId = null;
     window.currentViewingTableId = null;
-    let isGuestListCollapsed = false;
-    let currentFilter = 'all';
-    let activeHighlightTableId = null;
-    let guestToMoveId = null;
-    let pendingConfirmCallback = null;
+    window.isGuestListCollapsed = false;
+    window.currentFilter = 'all';
+    window.activeHighlightTableId = null;
+    window.pendingConfirmCallback = null;
 
-    // Zoom & Pan Variables
-    let mapScale = 1;
-    let mapPanX = 0;
-    let mapPanY = 0;
+    // Zoom Config
+    window.mapScale = 1;
+    window.mapPanX = 0;
+    window.mapPanY = 0;
     let isDraggingMap = false;
     let startMapX = 0;
     let startMapY = 0;
@@ -650,30 +607,18 @@
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // 💡 สำหรับใช้งานบน GitHub Pages: 
-    // หากต้องการใช้ระบบ Real-time ซิงค์ข้อมูลข้ามเครื่อง ให้สร้างโปรเจกต์ Firebase (ฟรี)
-    // แล้วเอา // ด้านหน้าออก และนำค่า Config มาวางแทนที่ด้านล่างนี้
     const myFirebaseConfig = {
-      // apiKey: "AIzaSy_YOUR_API_KEY",
-      // authDomain: "your-project.firebaseapp.com",
-      // projectId: "your-project",
-      // storageBucket: "your-project.appspot.com",
-      // messagingSenderId: "123456789",
-      // appId: "1:123456789:web:abcdef"
+      // ใส่ค่า Firebase Config ของคุณตรงนี้ได้เลยครับ หากไม่ใส่ จะใช้งานโหมด Offline แบบ LocalStorage
     };
-
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'banquet-app-github';
     
-    // Auto-detect environments: ใช้ Cloud ของ Sandbox หรือใช้ของ GitHub
-    const firebaseConfig = typeof __firebase_config !== 'undefined' 
-      ? JSON.parse(__firebase_config) 
-      : (Object.keys(myFirebaseConfig).length > 0 ? myFirebaseConfig : { apiKey: "dummy" });
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'banquet-app-github';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : (Object.keys(myFirebaseConfig).length > 0 ? myFirebaseConfig : { apiKey: "dummy" });
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
     let currentUser = null;
+
     const GUESTS_PATH = collection(db, 'artifacts', appId, 'public', 'data', 'banquet_guests');
     const TAGS_PATH = doc(db, 'artifacts', appId, 'public', 'data', 'banquet_settings', 'table_tags');
 
@@ -686,26 +631,21 @@
         }
         setupFirestoreListeners();
       } catch (err) {
-        console.error("Auth error, using local fallback.", err);
+        console.warn("เข้าสู่โหมด Offline Fallback.");
         loadLocalFallback();
       }
       initMapZoomPan();
     });
 
     function setupFirestoreListeners() {
-      // Listen to Guests
       onSnapshot(GUESTS_PATH, (snapshot) => {
         const freshGuests = [];
         snapshot.forEach(docSnap => freshGuests.push({ id: docSnap.id, ...docSnap.data() }));
         window.guests = freshGuests.sort((a, b) => a.id.localeCompare(b.id));
-        
-        // Save to LocalStorage Dual-Persistence
         localStorage.setItem('banquet_guests_fallback', JSON.stringify(window.guests));
-        
         triggerUIUpdates();
-      }, err => { console.error(err); loadLocalFallback(); });
+      }, err => { loadLocalFallback(); });
 
-      // Listen to Tags
       onSnapshot(TAGS_PATH, (docSnap) => {
         if (docSnap.exists()) {
           window.tableCustomTags = docSnap.data();
@@ -715,7 +655,7 @@
         }
         window.renderTablesOnSvg();
         window.populateTableGroupAdminList();
-      }, err => console.error(err));
+      }, err => console.warn(err));
     }
 
     function loadLocalFallback() {
@@ -727,113 +667,32 @@
       document.getElementById('onlineSyncBadge').className = 'inline-flex items-center gap-1.5 text-xs bg-rose-950/80 text-rose-400 px-2.5 py-0.5 rounded-full shadow-xs';
     }
 
-    // CRUD Expose to Window
     window.dbSaveGuest = async (obj) => { 
-      if(currentUser) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', obj.id), obj); 
+      if(currentUser) { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', obj.id), obj); }
+      else { window.guests.push(obj); saveLocal(); triggerUIUpdates(); }
     };
     window.dbUpdateCheckin = async (id, status, time) => { 
-      if(currentUser) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', id), {checkedIn: status, checkinTime: time}); 
+      if(currentUser) { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', id), {checkedIn: status, checkinTime: time}); }
+      else { let g = window.guests.find(x=>x.id===id); if(g) { g.checkedIn=status; g.checkinTime=time; saveLocal(); triggerUIUpdates(); } }
     };
     window.dbDeleteGuest = async (id) => { 
-      if(currentUser) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', id)); 
+      if(currentUser) { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', id)); }
+      else { window.guests = window.guests.filter(x=>x.id!==id); saveLocal(); triggerUIUpdates(); }
     };
     window.dbSaveTableTags = async (tagsObj) => { 
-      if(currentUser) await setDoc(TAGS_PATH, tagsObj); 
+      if(currentUser) { await setDoc(TAGS_PATH, tagsObj); }
     };
     window.dbBatchReplaceGuests = async (list) => {
-      if(!currentUser) return;
-      const batch = writeBatch(db);
-      window.guests.forEach(g => batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', g.id)));
-      list.forEach(g => batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', g.id), g));
-      await batch.commit();
+      if(currentUser) {
+        const batch = writeBatch(db);
+        window.guests.forEach(g => batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', g.id)));
+        list.forEach(g => batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'banquet_guests', g.id), g));
+        await batch.commit();
+      } else {
+        window.guests = list; saveLocal(); triggerUIUpdates();
+      }
     };
-  </script>
-
-  <script>
-    function initMapZoomPan() {
-      const svgContainer = document.getElementById('svgContainer');
-      
-      // Mouse Wheel Zoom
-      svgContainer.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        window.zoomMap(e.deltaY > 0 ? -0.1 : 0.1);
-      });
-
-      // Mouse Drag Pan
-      svgContainer.addEventListener('mousedown', (e) => {
-        isDraggingMap = true;
-        startMapX = e.clientX - mapPanX;
-        startMapY = e.clientY - mapPanY;
-        svgContainer.style.cursor = 'grabbing';
-      });
-      window.addEventListener('mousemove', (e) => {
-        if (!isDraggingMap) return;
-        mapPanX = e.clientX - startMapX;
-        mapPanY = e.clientY - startMapY;
-        applyMapTransform();
-      });
-      window.addEventListener('mouseup', () => { isDraggingMap = false; svgContainer.style.cursor = 'grab'; });
-
-      // Touch Pinch Zoom & Pan (Mobile)
-      let initialDistance = null;
-      let initialScale = 1;
-
-      svgContainer.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 1) {
-          isDraggingMap = true;
-          startMapX = e.touches[0].clientX - mapPanX;
-          startMapY = e.touches[0].clientY - mapPanY;
-        } else if (e.touches.length === 2) {
-          initialDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-          initialScale = mapScale;
-        }
-      });
-      svgContainer.addEventListener('touchmove', (e) => {
-        if (e.touches.length === 1 && isDraggingMap) {
-          mapPanX = e.touches[0].clientX - startMapX;
-          mapPanY = e.touches[0].clientY - startMapY;
-          applyMapTransform();
-        } else if (e.touches.length === 2 && initialDistance) {
-          const currentDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-          const rawScale = initialScale * (currentDistance / initialDistance);
-          mapScale = Math.min(Math.max(0.4, rawScale), 3);
-          applyMapTransform();
-        }
-      });
-      svgContainer.addEventListener('touchend', () => {
-        isDraggingMap = false;
-        initialDistance = null;
-      });
-    }
-
-    window.zoomMap = function(delta) {
-      mapScale = Math.min(Math.max(0.4, mapScale + delta), 3);
-      applyMapTransform();
-    };
-
-    window.resetZoomPan = function() {
-      mapScale = 1; mapPanX = 0; mapPanY = 0;
-      applyMapTransform();
-    };
-
-    function applyMapTransform() {
-      document.getElementById('mapZoomWrapper').setAttribute('transform', `translate(${mapPanX}, ${mapPanY}) scale(${mapScale})`);
-    }
-
-    // Auto Center Camera on specific table
-    window.centerOnTable = function(tableId) {
-      const table = TABLES_CONFIG.find(t => t.id === tableId);
-      if (!table) return;
-      
-      const container = document.getElementById('svgContainer');
-      const w = container.clientWidth;
-      const h = container.clientHeight;
-      
-      mapScale = 1.3; // Zoom in
-      mapPanX = (w / 2) - (table.svgX * mapScale);
-      mapPanY = (h / 2) - (table.svgY * mapScale);
-      applyMapTransform();
-    };
+    function saveLocal() { localStorage.setItem('banquet_guests_fallback', JSON.stringify(window.guests)); }
   </script>
 
   <script>
@@ -858,7 +717,6 @@
     };
 
     window.populateDropdowns = function() {
-      // 1. Tag Filter
       const tagSelect = document.getElementById('groupTagFilterSelect');
       const curTag = tagSelect.value;
       tagSelect.innerHTML = '<option value="all">🏷️ ทุกกลุ่มโต๊ะ</option>';
@@ -867,7 +725,6 @@
       });
       tagSelect.value = Array.from(tagSelect.options).some(o=>o.value===curTag) ? curTag : 'all';
 
-      // 2. Fast Map Jump Select
       const fastSelect = document.getElementById('fastTableSearchSelect');
       const curFast = fastSelect.value;
       fastSelect.innerHTML = '<option value="">🎯 -- คลิกเพื่อค้นหาและเลือกชื่อโต๊ะ --</option>';
@@ -880,34 +737,26 @@
 
     window.jumpToTable = function() {
       const tId = document.getElementById('fastTableSearchSelect').value;
-      if (tId) {
-        window.centerOnTable(tId);
-        window.highlightTableOnMap(tId);
-        scrollMobileToMap();
-      } else {
-        window.resetMapView();
-      }
+      if (tId) { window.centerOnTable(tId); window.highlightTableOnMap(tId); scrollMobileToMap(); } 
+      else { window.resetMapView(); }
     };
 
     function scrollMobileToMap() {
       if (window.innerWidth < 1024) document.getElementById('panel-right').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // DRAW SVG TABLES
     window.renderTablesOnSvg = function() {
       const container = document.getElementById('tablesContainer');
       container.innerHTML = '';
-      
       TABLES_CONFIG.forEach(t => {
         const tableGuests = window.guests.filter(g => g.tableId === t.id);
         const checkCount = tableGuests.filter(g => g.checkedIn).length;
         const total = tableGuests.length;
-        const isHighlight = activeHighlightTableId === t.id;
+        const isHighlight = window.activeHighlightTableId === t.id;
 
         let fill = '#ffffff', stroke = '#fbcfe8';
         if (total >= 8) {
-          fill = checkCount === 8 ? '#dcfce7' : '#fce7f3';
-          stroke = checkCount === 8 ? '#16a34a' : '#db2777';
+          fill = checkCount === 8 ? '#dcfce7' : '#fce7f3'; stroke = checkCount === 8 ? '#16a34a' : '#db2777';
         } else if (total > 0) {
           fill = '#ffffff'; stroke = '#f472b6';
         }
@@ -916,7 +765,6 @@
         g.setAttribute('class', `table-node ${isHighlight ? 'active-table' : ''}`);
         g.onclick = () => window.handleTableClick(t.id);
         
-        // Add Chairs
         for (let i = 0; i < 8; i++) {
           const angle = (i * 45) * Math.PI / 180;
           const chair = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -928,7 +776,6 @@
           g.appendChild(chair);
         }
 
-        // Add Table Circle
         const tableCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         tableCircle.setAttribute('cx', t.svgX);
         tableCircle.setAttribute('cy', t.svgY);
@@ -939,7 +786,6 @@
         tableCircle.setAttribute('filter', 'url(#shadow)');
         g.appendChild(tableCircle);
 
-        // Add Text Label
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         text.setAttribute('x', t.svgX);
         text.setAttribute('y', t.svgY + 4);
@@ -955,7 +801,7 @@
     };
 
     window.highlightTableOnMap = function(tableId) {
-      activeHighlightTableId = tableId;
+      window.activeHighlightTableId = tableId;
       window.renderTablesOnSvg();
       const table = TABLES_CONFIG.find(t => t.id === tableId);
       const pin = document.getElementById('animatedPin');
@@ -966,14 +812,13 @@
     };
     
     window.resetMapView = function() {
-      activeHighlightTableId = null;
+      window.activeHighlightTableId = null;
       window.selectedGuestId = null;
       document.getElementById('animatedPin').classList.add('hidden');
       document.getElementById('highlightCard').classList.add('hidden');
       window.renderTablesOnSvg();
     };
 
-    // SEARCH & FILTERS
     window.handleSearch = function() {
       const q = document.getElementById('searchInput').value.trim().toLowerCase();
       document.getElementById('btnClearSearch').classList.toggle('hidden', q.length === 0);
@@ -985,7 +830,7 @@
       window.resetMapView();
     };
     window.setFilter = function(type) {
-      currentFilter = type;
+      window.currentFilter = type;
       ['all', 'small', 'large', 'unchecked'].forEach(f => {
         document.getElementById(`filter-${f}`).className = (f === type) 
           ? 'px-2.5 py-1 rounded-full bg-pink-600 text-white font-medium shadow-xs' 
@@ -995,7 +840,6 @@
     };
     window.handleGroupTagFilterChange = function() { window.handleSearch(); };
 
-    // RENDER GUEST LIST
     window.renderGuestList = function(query = '') {
       const c = document.getElementById('guestListContainer');
       const tagF = document.getElementById('groupTagFilterSelect').value;
@@ -1004,7 +848,7 @@
         const t = TABLES_CONFIG.find(x => x.id === g.tableId);
         const tag = getTableTag(g.tableId);
         const matchQ = !query || g.name.toLowerCase().includes(query) || (g.nickname||'').toLowerCase().includes(query) || (t&&t.name.toLowerCase().includes(query)) || tag.toLowerCase().includes(query);
-        const matchF = currentFilter==='all' || (currentFilter==='small' && t?.room==='small') || (currentFilter==='large' && t?.room==='large') || (currentFilter==='unchecked' && !g.checkedIn);
+        const matchF = window.currentFilter==='all' || (window.currentFilter==='small' && t?.room==='small') || (window.currentFilter==='large' && t?.room==='large') || (window.currentFilter==='unchecked' && !g.checkedIn);
         const matchTag = tagF === 'all' || tag === tagF;
         return matchQ && matchF && matchTag;
       });
@@ -1021,7 +865,7 @@
         const tag = getTableTag(g.tableId);
         const isSel = window.selectedGuestId === g.id;
         
-        return `<div onclick="selectGuest('${g.id}')" class="p-3 rounded-xl transition cursor-pointer flex items-center justify-between gap-2 ${isSel ? 'bg-pink-50 border-2 border-pink-400' : 'bg-white hover:bg-pink-50/50 border border-transparent'}">
+        return `<div onclick="window.selectGuest('${g.id}')" class="p-3 rounded-xl transition cursor-pointer flex items-center justify-between gap-2 ${isSel ? 'bg-pink-50 border-2 border-pink-400' : 'bg-white hover:bg-pink-50/50 border border-transparent'}">
           <div class="flex items-center space-x-3">
             <div class="w-10 h-10 rounded-full ${g.checkedIn ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'} flex items-center justify-center text-sm"><i class="fa-solid ${g.checkedIn ? 'fa-check' : 'fa-user'}"></i></div>
             <div>
@@ -1034,7 +878,7 @@
               </p>
             </div>
           </div>
-          <button onclick="event.stopPropagation(); toggleCheckin('${g.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition ${g.checkedIn ? 'bg-emerald-50 text-emerald-700' : 'bg-pink-600 text-white'} shadow-sm">
+          <button onclick="event.stopPropagation(); window.toggleCheckin('${g.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition ${g.checkedIn ? 'bg-emerald-50 text-emerald-700' : 'bg-pink-600 text-white'} shadow-sm">
             ${g.checkedIn ? '<i class="fa-solid fa-check me-1"></i>แล้ว' : 'เช็คอิน'}
           </button>
         </div>`;
@@ -1044,6 +888,7 @@
     window.selectGuest = function(id) {
       window.selectedGuestId = id;
       const g = window.guests.find(x => x.id === id);
+      if(!g) return;
       const t = TABLES_CONFIG.find(x => x.id === g.tableId);
       
       document.getElementById('hlGuestName').innerHTML = `${g.name} ${g.nickname ? `<span class="text-pink-600">(${g.nickname})</span>` : ''}`;
@@ -1063,27 +908,18 @@
       }
 
       document.getElementById('highlightCard').classList.remove('hidden');
-      if (t) {
-        window.centerOnTable(t.id);
-        window.highlightTableOnMap(t.id);
-        scrollMobileToMap();
-      }
+      if (t) { window.centerOnTable(t.id); window.highlightTableOnMap(t.id); scrollMobileToMap(); }
       window.handleSearch();
     };
 
-  </script>
-
-  <script>
-    // Action functions
     window.toggleCheckin = async function(id) {
       const g = window.guests.find(x => x.id === id);
       if(!g) return;
       await window.dbUpdateCheckin(id, !g.checkedIn, !g.checkedIn ? new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) : null);
       showToast(!g.checkedIn ? `ยกเลิกเช็คอินแล้ว` : `เช็คอินคุณ ${g.name} แล้ว`);
     };
-    window.toggleCheckinCurrent = () => { if(selectedGuestId) toggleCheckin(selectedGuestId); };
+    window.toggleCheckinCurrent = () => { if(window.selectedGuestId) window.toggleCheckin(window.selectedGuestId); };
 
-    // Table Click
     window.handleTableClick = function(id) {
       window.currentViewingTableId = id;
       const t = TABLES_CONFIG.find(x => x.id === id);
@@ -1092,7 +928,6 @@
 
       document.getElementById('modalTableTitle').innerText = t.name;
       document.getElementById('modalTableTagBadge').innerText = getTableTag(id);
-      
       const gList = window.guests.filter(x => x.tableId === id);
       document.getElementById('modalTableZone').innerText = `ที่นั่ง ${gList.length}/8 คน`;
       
@@ -1100,10 +935,10 @@
         <div class="p-3 border border-pink-100 rounded-xl flex flex-col gap-2 text-sm bg-pink-50/30">
           <div class="flex justify-between items-center">
             <span class="font-bold text-slate-800">${i+1}. ${g.name} ${g.nickname ? `<span class="text-pink-600">(${g.nickname})</span>` : ''}</span>
-            <button onclick="toggleCheckin('${g.id}');" class="px-2.5 py-1 text-xs rounded-lg font-semibold ${g.checkedIn?'bg-emerald-100 text-emerald-800':'bg-pink-600 text-white shadow-sm'}">${g.checkedIn?'<i class="fa-solid fa-check"></i> เช็คอินแล้ว':'เช็คอิน'}</button>
+            <button onclick="window.toggleCheckin('${g.id}');" class="px-2.5 py-1 text-xs rounded-lg font-semibold ${g.checkedIn?'bg-emerald-100 text-emerald-800':'bg-pink-600 text-white shadow-sm'}">${g.checkedIn?'<i class="fa-solid fa-check"></i> เช็คอินแล้ว':'เช็คอิน'}</button>
           </div>
           <div class="flex justify-end gap-1.5 border-t border-pink-100/50 pt-2 mt-1">
-            <button onclick="deleteGuestPrompt('${g.id}')" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium text-xs rounded-lg transition"><i class="fa-solid fa-user-minus"></i> ถอดชื่อ</button>
+            <button onclick="window.deleteGuestPrompt('${g.id}')" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium text-xs rounded-lg transition"><i class="fa-solid fa-user-minus"></i> ถอดชื่อ</button>
           </div>
         </div>
       `).join('') : '<p class="text-center text-slate-400 py-4"><i class="fa-solid fa-chair text-2xl block mb-2 text-pink-200"></i>โต๊ะว่าง</p>';
@@ -1120,7 +955,6 @@
       document.getElementById('directAddNickname').value = '';
       document.getElementById('directAddGuestModal').classList.remove('hidden');
     };
-
     window.closeDirectAddGuestModal = () => document.getElementById('directAddGuestModal').classList.add('hidden');
 
     window.handleConfirmDirectAddGuest = async (e) => {
@@ -1140,7 +974,7 @@
       };
       
       if (window.dbSaveGuest) await window.dbSaveGuest(newG);
-      closeDirectAddGuestModal();
+      window.closeDirectAddGuestModal();
       showToast(`เพิ่มคุณ ${name} เข้าโต๊ะเรียบร้อยแล้ว`);
     };
 
@@ -1161,11 +995,86 @@
       if (window.dbSaveGuest) await window.dbSaveGuest(newG);
       showToast(`เพิ่มแขก Walk-in เข้าโต๊ะเรียบร้อยแล้ว`);
     };
+  </script>
 
-    // Admin Tools
+  <script>
+    function initMapZoomPan() {
+      const svgContainer = document.getElementById('svgContainer');
+      svgContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        window.zoomMap(e.deltaY > 0 ? -0.1 : 0.1);
+      });
+      svgContainer.addEventListener('mousedown', (e) => {
+        window.isDraggingMap = true;
+        window.startMapX = e.clientX - window.mapPanX;
+        window.startMapY = e.clientY - window.mapPanY;
+        svgContainer.style.cursor = 'grabbing';
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!window.isDraggingMap) return;
+        window.mapPanX = e.clientX - window.startMapX;
+        window.mapPanY = e.clientY - window.startMapY;
+        applyMapTransform();
+      });
+      window.addEventListener('mouseup', () => { window.isDraggingMap = false; svgContainer.style.cursor = 'grab'; });
+
+      let initialDistance = null;
+      let initialScale = 1;
+      svgContainer.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          window.isDraggingMap = true;
+          window.startMapX = e.touches[0].clientX - window.mapPanX;
+          window.startMapY = e.touches[0].clientY - window.mapPanY;
+        } else if (e.touches.length === 2) {
+          initialDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+          initialScale = window.mapScale;
+        }
+      });
+      svgContainer.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1 && window.isDraggingMap) {
+          window.mapPanX = e.touches[0].clientX - window.startMapX;
+          window.mapPanY = e.touches[0].clientY - window.startMapY;
+          applyMapTransform();
+        } else if (e.touches.length === 2 && initialDistance) {
+          const currentDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+          const rawScale = initialScale * (currentDistance / initialDistance);
+          window.mapScale = Math.min(Math.max(0.4, rawScale), 3);
+          applyMapTransform();
+        }
+      });
+      svgContainer.addEventListener('touchend', () => { window.isDraggingMap = false; initialDistance = null; });
+    }
+
+    window.zoomMap = function(delta) {
+      window.mapScale = Math.min(Math.max(0.4, window.mapScale + delta), 3);
+      applyMapTransform();
+    };
+
+    window.resetZoomPan = function() {
+      window.mapScale = 1; window.mapPanX = 0; window.mapPanY = 0;
+      applyMapTransform();
+    };
+
+    function applyMapTransform() {
+      document.getElementById('mapZoomWrapper').setAttribute('transform', `translate(${window.mapPanX}, ${window.mapPanY}) scale(${window.mapScale})`);
+    }
+
+    window.centerOnTable = function(tableId) {
+      const table = TABLES_CONFIG.find(t => t.id === tableId);
+      if (!table) return;
+      const container = document.getElementById('svgContainer');
+      const w = container.clientWidth; const h = container.clientHeight;
+      window.mapScale = 1.3;
+      window.mapPanX = (w / 2) - (table.svgX * window.mapScale);
+      window.mapPanY = (h / 2) - (table.svgY * window.mapScale);
+      applyMapTransform();
+    };
+  </script>
+
+  <script>
     window.openAdminModal = () => {
-      if (window.populateTableDropdown) window.populateTableDropdown();
-      if (window.populateTableGroupAdminList) window.populateTableGroupAdminList();
+      window.populateTableDropdown();
+      window.populateTableGroupAdminList();
       document.getElementById('adminModal').classList.remove('hidden');
     };
     window.closeAdminModal = () => document.getElementById('adminModal').classList.add('hidden');
@@ -1201,15 +1110,11 @@
     window.saveAllAdminTableGroups = async function() {
       TABLES_CONFIG.forEach(t => {
         const input = document.getElementById(`adminTableTagInput_${t.id}`);
-        if (input) {
-          window.tableCustomTags[t.id] = input.value.trim() || 'ทั่วไป';
-        }
+        if (input) { window.tableCustomTags[t.id] = input.value.trim() || 'ทั่วไป'; }
       });
-      if (window.dbSaveTableTags) {
-        await window.dbSaveTableTags(window.tableCustomTags);
-      }
+      if (window.dbSaveTableTags) { await window.dbSaveTableTags(window.tableCustomTags); }
       showToast('บันทึกชื่อกลุ่มโต๊ะทั้งหมดเรียบร้อยแล้ว');
-      closeAdminModal();
+      window.closeAdminModal();
     };
 
     window.populateTableDropdown = function() {
@@ -1233,25 +1138,21 @@
         nickname: document.getElementById('addNickname').value.trim(),
         tableId: document.getElementById('addTable').value,
         notes: document.getElementById('addNotes').value.trim(),
-        checkedIn: false,
-        checkinTime: null
+        checkedIn: false, checkinTime: null
       };
       if (window.dbSaveGuest) await window.dbSaveGuest(newG);
       document.getElementById('addGuestForm').reset();
       showToast('เพิ่มรายชื่อคุณ ' + name + ' เรียบร้อยแล้ว');
     };
 
-    // Bulk Add
     window.processBulkImport = async function() {
       const text = document.getElementById('bulkInputText').value.trim();
       if(!text) return showToast('กรุณาวางรายชื่อก่อน', 'fa-triangle-exclamation');
-      
       const newG = [];
       let tIdx = 0, seatCount = 0;
       text.split('\n').forEach((line, i) => {
         const p = line.split(',').map(x=>x.trim());
         if(!p[0]) return;
-        
         let tId = p[2] ? TABLES_CONFIG.find(x=>x.id===p[2]||x.label===p[2])?.id : null;
         if(!tId) {
           while(tIdx < 29 && seatCount >= 8) { tIdx++; seatCount=0; }
@@ -1260,42 +1161,35 @@
         }
         newG.push({ id:'G'+Date.now()+i, name: p[0], nickname: p[1]||'', tableId: tId, checkedIn: false, checkinTime: null, notes: '' });
       });
-      
       if(newG.length && window.dbBatchReplaceGuests) {
         await window.dbBatchReplaceGuests(newG);
         showToast(`นำเข้า ${newG.length} รายชื่อแล้ว`);
-        closeAdminModal();
+        window.closeAdminModal();
         document.getElementById('bulkInputText').value = '';
       }
     };
 
-    // Tools & Export
     window.generate232MockGuestsPrompt = () => {
-      showConfirmModal('สร้าง 232 รายชื่อ', 'ยืนยันการสร้างข้อมูลจำลองแบบเต็มความจุ?', async () => {
+      window.showConfirmModal('สร้าง 232 รายชื่อ', 'ยืนยันการสร้างข้อมูลจำลองแบบเต็มความจุ?', async () => {
         const mock = []; let c = 0;
         TABLES_CONFIG.forEach(t => {
           for(let i=0; i<8; i++) {
             c++;
             mock.push({
-              id: 'G'+String(c).padStart(3,'0'),
-              name: `คุณ${FIRST_NAMES[c%10]} ${LAST_NAMES[c%10]}`,
-              nickname: NICKNAMES[c%10],
-              tableId: t.id,
-              checkedIn: c%3===0,
-              checkinTime: c%3===0 ? '18:30':null,
-              notes: ''
+              id: 'G'+String(c).padStart(3,'0'), name: `คุณ${FIRST_NAMES[c%10]} ${LAST_NAMES[c%10]}`,
+              nickname: NICKNAMES[c%10], tableId: t.id, checkedIn: c%3===0, checkinTime: c%3===0 ? '18:30':null, notes: ''
             });
           }
         });
         await window.dbBatchReplaceGuests(mock);
-        closeAdminModal(); showToast('สร้าง 232 รายชื่อเรียบร้อยแล้ว');
+        window.closeAdminModal(); showToast('สร้าง 232 รายชื่อเรียบร้อยแล้ว');
       });
     };
 
     window.clearAllGuestDataPrompt = () => {
-      showConfirmModal('ล้างข้อมูล', 'ต้องการลบข้อมูลแขกทั้งหมดทิ้งหรือไม่?', async () => {
+      window.showConfirmModal('ล้างข้อมูล', 'ต้องการลบข้อมูลแขกทั้งหมดทิ้งหรือไม่?', async () => {
         await window.dbBatchReplaceGuests([]);
-        closeAdminModal(); showToast('ล้างข้อมูลทั้งหมดแล้ว');
+        window.closeAdminModal(); showToast('ล้างข้อมูลทั้งหมดแล้ว');
       });
     };
 
@@ -1310,31 +1204,26 @@
       a.click();
     };
 
-    // UI Helpers
     window.showConfirmModal = (title, msg, cb) => {
       document.getElementById('confirmModalTitle').innerText = title;
       document.getElementById('confirmModalMessage').innerText = msg;
-      pendingConfirmCallback = cb;
+      window.pendingConfirmCallback = cb;
       document.getElementById('customConfirmModal').classList.remove('hidden');
     };
     window.closeConfirmModal = () => document.getElementById('customConfirmModal').classList.add('hidden');
-    window.executeConfirmAction = () => { closeConfirmModal(); if(pendingConfirmCallback) pendingConfirmCallback(); };
+    window.executeConfirmAction = () => { window.closeConfirmModal(); if(window.pendingConfirmCallback) window.pendingConfirmCallback(); };
     window.showToast = (msg, icon='fa-check-circle') => {
       document.getElementById('toastMessage').innerText = msg;
       const t = document.getElementById('toastNotification');
       t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 3000);
     };
     window.toggleGuestListCollapse = () => {
-      isGuestListCollapsed = !isGuestListCollapsed;
-      document.getElementById('guestListContainer').classList.toggle('hidden', isGuestListCollapsed);
-      document.getElementById('guestListChevron').style.transform = isGuestListCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+      window.isGuestListCollapsed = !window.isGuestListCollapsed;
+      document.getElementById('guestListContainer').classList.toggle('hidden', window.isGuestListCollapsed);
+      document.getElementById('guestListChevron').style.transform = window.isGuestListCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
     };
     
-    // Add/Edit/Delete stubs for single guest interactions
-    window.deleteGuestPrompt = (id) => showConfirmModal('ลบแขก', 'ยืนยันการถอดรายชื่อนี้?', async () => { await window.dbDeleteGuest(id); showToast('ลบเรียบร้อย'); });
-    window.openMoveTableModal = (id) => { /* basic placeholder for move modal */ showToast('ฟังก์ชันย้ายโต๊ะถูกซ่อนในโหมดสรุปโค้ด'); };
-    window.openEditGuestModal = (id) => { showToast('ฟังก์ชันแก้ไขถูกซ่อนในโหมดสรุปโค้ด'); };
-    
+    window.deleteGuestPrompt = (id) => window.showConfirmModal('ลบแขก', 'ยืนยันการถอดรายชื่อนี้?', async () => { await window.dbDeleteGuest(id); window.showToast('ลบเรียบร้อย'); });
   </script>
 </body>
 </html>
