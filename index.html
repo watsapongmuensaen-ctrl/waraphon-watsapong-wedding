@@ -538,7 +538,8 @@
 
   <script>
     // 29 Tables: 5 Small, 24 Large (8 Rows x 3 Cols). Total 232 Seats.
-    const TABLES_CONFIG = [
+    // Use var instead of const to avoid "already been declared" in live server environments
+    var TABLES_CONFIG = [
       { id: 'S1', name: 'โต๊ะ S1', room: 'small', svgX: 445, svgY: 370, label: 'S1' },
       { id: 'S2', name: 'โต๊ะ S2', room: 'small', svgX: 325, svgY: 415, label: 'S2' },
       { id: 'S3', name: 'โต๊ะ S3', room: 'small', svgX: 445, svgY: 460, label: 'S3' },
@@ -570,7 +571,7 @@
       { id: 'L24', name: 'โต๊ะ 24', room: 'large', svgX: 795, svgY: 565, label: '24' }
     ];
 
-    const DEFAULT_TABLE_TAGS = {
+    var DEFAULT_TABLE_TAGS = {
       'S1': 'ครอบครัวเจ้าสาว', 'S2': 'ครอบครัวเจ้าสาว', 'S3': 'ญาติเจ้าสาว', 'S4': 'ญาติเจ้าสาว', 'S5': 'ทั่วไป',
       'L01': 'VIP แขกผู้ใหญ่', 'L02': 'VIP แขกผู้ใหญ่', 'L03': 'ครอบครัวเจ้าบ่าว', 'L04': 'ครอบครัวเจ้าบ่าว', 
       'L05': 'เพื่อนเจ้าบ่าว', 'L06': 'เพื่อนเจ้าบ่าว', 'L07': 'เพื่อนเจ้าสาว', 'L08': 'เพื่อนเจ้าสาว',
@@ -580,12 +581,12 @@
       'L21': 'แขกทั่วไป', 'L22': 'แขกทั่วไป', 'L23': 'แขกทั่วไป', 'L24': 'สำรอง'
     };
 
-    const FIRST_NAMES = ["สมชาย", "สมหญิง", "วิชัย", "อนันต์", "นภา", "ปรีชา", "ศิริพร", "กิตติศักดิ์", "เมทินี", "วรรณภา"];
-    const LAST_NAMES = ["ใจดี", "รักสงบ", "ชัยชนะ", "สุขเสริฐ", "วงศ์สว่าง", "เลิศล้ำ", "บุญมา", "เจริญพร", "เด่นดวง", "สุขใจ"];
-    const NICKNAMES = ["ชาย", "หญิง", "ชัย", "นันท์", "ภา", "ชา", "พร", "ตี้", "เมย์", "วรรณ"];
+    var FIRST_NAMES = ["สมชาย", "สมหญิง", "วิชัย", "อนันต์", "นภา", "ปรีชา", "ศิริพร", "กิตติศักดิ์", "เมทินี", "วรรณภา"];
+    var LAST_NAMES = ["ใจดี", "รักสงบ", "ชัยชนะ", "สุขเสริฐ", "วงศ์สว่าง", "เลิศล้ำ", "บุญมา", "เจริญพร", "เด่นดวง", "สุขใจ"];
+    var NICKNAMES = ["ชาย", "หญิง", "ชัย", "นันท์", "ภา", "ชา", "พร", "ตี้", "เมย์", "วรรณ"];
 
     window.guests = [];
-    window.tableCustomTags = { ...DEFAULT_TABLE_TAGS };
+    window.tableCustomTags = Object.assign({}, DEFAULT_TABLE_TAGS);
     window.selectedGuestId = null;
     window.currentViewingTableId = null;
     window.isGuestListCollapsed = false;
@@ -597,9 +598,9 @@
     window.mapScale = 1;
     window.mapPanX = 0;
     window.mapPanY = 0;
-    let isDraggingMap = false;
-    let startMapX = 0;
-    let startMapY = 0;
+    window.isDraggingMap = false;
+    window.startMapX = 0;
+    window.startMapY = 0;
   </script>
 
   <script type="module">
@@ -607,10 +608,7 @@
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    const myFirebaseConfig = {
-      // ใส่ค่า Firebase Config ของคุณตรงนี้ได้เลยครับ หากไม่ใส่ จะใช้งานโหมด Offline แบบ LocalStorage
-    };
-    
+    const myFirebaseConfig = {};
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'banquet-app-github';
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : (Object.keys(myFirebaseConfig).length > 0 ? myFirebaseConfig : { apiKey: "dummy" });
 
@@ -661,8 +659,12 @@
     function loadLocalFallback() {
       const saved = localStorage.getItem('banquet_guests_fallback');
       if (saved) {
-        try { window.guests = JSON.parse(saved); triggerUIUpdates(); } catch(e){}
+        try { window.guests = JSON.parse(saved); } catch(e){}
       }
+      
+      // บังคับสั่งอัปเดต UI เสมอ เพื่อให้ระบบวาดโต๊ะและใส่ข้อมูลใน Dropdown แม้จะยังไม่มีรายชื่อแขกเลยก็ตาม
+      triggerUIUpdates();
+
       document.getElementById('syncText').innerText = 'ทำงานแบบออฟไลน์';
       document.getElementById('onlineSyncBadge').className = 'inline-flex items-center gap-1.5 text-xs bg-rose-950/80 text-rose-400 px-2.5 py-0.5 rounded-full shadow-xs';
     }
@@ -747,6 +749,7 @@
 
     window.renderTablesOnSvg = function() {
       const container = document.getElementById('tablesContainer');
+      if(!container) return;
       container.innerHTML = '';
       TABLES_CONFIG.forEach(t => {
         const tableGuests = window.guests.filter(g => g.tableId === t.id);
@@ -842,6 +845,7 @@
 
     window.renderGuestList = function(query = '') {
       const c = document.getElementById('guestListContainer');
+      if(!c) return;
       const tagF = document.getElementById('groupTagFilterSelect').value;
       
       let filtered = window.guests.filter(g => {
