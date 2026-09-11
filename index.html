@@ -650,8 +650,24 @@
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'banquet-app';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "dummy" };
+    // 💡 สำหรับใช้งานบน GitHub Pages: 
+    // หากต้องการใช้ระบบ Real-time ซิงค์ข้อมูลข้ามเครื่อง ให้สร้างโปรเจกต์ Firebase (ฟรี)
+    // แล้วเอา // ด้านหน้าออก และนำค่า Config มาวางแทนที่ด้านล่างนี้
+    const myFirebaseConfig = {
+      // apiKey: "AIzaSy_YOUR_API_KEY",
+      // authDomain: "your-project.firebaseapp.com",
+      // projectId: "your-project",
+      // storageBucket: "your-project.appspot.com",
+      // messagingSenderId: "123456789",
+      // appId: "1:123456789:web:abcdef"
+    };
+
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'banquet-app-github';
+    
+    // Auto-detect environments: ใช้ Cloud ของ Sandbox หรือใช้ของ GitHub
+    const firebaseConfig = typeof __firebase_config !== 'undefined' 
+      ? JSON.parse(__firebase_config) 
+      : (Object.keys(myFirebaseConfig).length > 0 ? myFirebaseConfig : { apiKey: "dummy" });
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
