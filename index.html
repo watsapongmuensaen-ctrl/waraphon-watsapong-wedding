@@ -99,12 +99,8 @@
         <div>
           <div class="flex items-center gap-3 flex-wrap">
             <h1 class="text-lg md:text-xl font-bold tracking-wide text-wedding-900">แผนผังที่นั่งงานฉลองมงคลสมรส</h1>
-            <span id="onlineSyncBadge" class="inline-flex items-center gap-1.5 text-[11px] bg-white text-wedding-500 px-3 py-1 rounded-full border border-wedding-500 font-semibold shadow-sm">
-              <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-wedding-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-wedding-500"></span>
-              </span>
-              <span id="syncText">ระบบออฟไลน์ (พร้อมใช้งาน)</span>
+            <span id="onlineSyncBadge" class="inline-flex items-center gap-1.5 text-[11px] bg-white text-wedding-400 px-3 py-1 rounded-full border border-wedding-400 font-semibold shadow-sm">
+              <span id="syncText">รอการเชื่อมต่อคลาวด์...</span>
             </span>
           </div>
           <p class="text-[11px] text-wedding-600 font-medium">ระบบค้นหาโต๊ะและลงทะเบียนแขก (232 ท่าน)</p>
@@ -556,37 +552,144 @@
     </div>
   </div>
 
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Setup App Config from Environment
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'banquet-app-default';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    if (firebaseConfig) {
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Strict Paths for Global Multiplayer Sync
+        const guestsCol = collection(db, 'artifacts', appId, 'public', 'data', 'guests');
+        const tagsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'globalTags');
+
+        try {
+            // Authenticate before query
+            if (initialAuthToken) {
+                await signInWithCustomToken(auth, initialAuthToken);
+            } else {
+                await signInAnonymously(auth);
+            }
+
+            // Real-time listener for guests changes
+            onSnapshot(guestsCol, async (snapshot) => {
+                if (snapshot.empty) {
+                    // MIGRATION FEATURE: Auto-upload existing offline data to cloud!
+                    const localGuests = localStorage.getItem('banquet_guests_data');
+                    if (localGuests) {
+                        try {
+                            const parsed = JSON.parse(localGuests);
+                            if (parsed.length > 0) {
+                                console.log("Migrating offline guest data to Cloud DB...");
+                                const batch = writeBatch(db);
+                                parsed.forEach(g => batch.set(doc(guestsCol, g.id), g));
+                                await batch.commit();
+                                localStorage.removeItem('banquet_guests_data');
+                                return; // Stop here, the upload will re-trigger the snapshot
+                            }
+                        } catch(e) {}
+                    }
+                }
+
+                window.guests = [];
+                snapshot.forEach(d => window.guests.push(d.data()));
+
+                const badge = document.getElementById('onlineSyncBadge');
+                if (badge) {
+                    badge.className = "inline-flex items-center gap-1.5 text-[11px] bg-white text-wedding-mint px-3 py-1 rounded-full border border-wedding-mint font-semibold shadow-sm";
+                    badge.innerHTML = `<span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-wedding-mint"></span></span><span id="syncText">ออนไลน์ (ข้อมูลตรงกันทุกหน้าจอ)</span>`;
+                }
+
+                if (typeof window.triggerUIUpdates === 'function') window.triggerUIUpdates();
+            }, (error) => console.error("Guest Sync Error", error));
+
+            // Real-time listener for tags changes
+            onSnapshot(tagsDoc, async (docSnap) => {
+                if (!docSnap.exists()) {
+                    const localTags = localStorage.getItem('banquet_tags_data');
+                    if (localTags) {
+                        try {
+                            const parsed = JSON.parse(localTags);
+                            await setDoc(tagsDoc, parsed);
+                            localStorage.removeItem('banquet_tags_data');
+                            return;
+                        } catch(e) {}
+                    }
+                } else {
+                    window.tableCustomTags = docSnap.data();
+                }
+                if (typeof window.triggerUIUpdates === 'function') window.triggerUIUpdates();
+            }, (error) => console.error("Tags Sync Error", error));
+
+            // OVERRIDE Local functions with Cloud Firebase functions
+            window.dbSaveGuest = async (obj) => {
+                await setDoc(doc(guestsCol, obj.id), obj);
+            };
+            window.dbUpdateCheckin = async (id, status, time) => {
+                await setDoc(doc(guestsCol, id), { checkedIn: status, checkinTime: time }, { merge: true });
+            };
+            window.dbDeleteGuest = async (id) => {
+                await deleteDoc(doc(guestsCol, id));
+            };
+            window.dbSaveTableTags = async (tagsObj) => {
+                await setDoc(tagsDoc, tagsObj);
+            };
+            window.dbBatchReplaceGuests = async (list) => {
+                const batch = writeBatch(db);
+                const snap = await getDocs(guestsCol);
+                snap.forEach(d => batch.delete(d.ref));
+                list.forEach(g => batch.set(doc(guestsCol, g.id), g));
+                await batch.commit();
+            };
+
+        } catch (error) {
+            console.error("Cloud Authentication Failed, running offline:", error);
+        }
+    } else {
+        console.warn("Cloud configuration not found, running fully offline.");
+    }
+  </script>
+
   <script>
     var TABLES_CONFIG = [
-      { id: 'S1', name: 'โต๊ะ S1', room: 'small', svgX: 425, svgY: 410, label: 'S1' },
-      { id: 'S2', name: 'โต๊ะ S2', room: 'small', svgX: 290, svgY: 465, label: 'S2' },
-      { id: 'S3', name: 'โต๊ะ S3', room: 'small', svgX: 425, svgY: 520, label: 'S3' },
-      { id: 'S4', name: 'โต๊ะ S4', room: 'small', svgX: 290, svgY: 575, label: 'S4' },
-      { id: 'S5', name: 'โต๊ะ S5', room: 'small', svgX: 425, svgY: 630, label: 'S5' },
-      { id: 'L01', name: 'โต๊ะ 01', room: 'large', svgX: 645, svgY: 140, label: '01' },
-      { id: 'L02', name: 'โต๊ะ 02', room: 'large', svgX: 645, svgY: 208, label: '02' },
-      { id: 'L03', name: 'โต๊ะ 03', room: 'large', svgX: 645, svgY: 276, label: '03' },
-      { id: 'L04', name: 'โต๊ะ 04', room: 'large', svgX: 645, svgY: 344, label: '04' },
-      { id: 'L05', name: 'โต๊ะ 05', room: 'large', svgX: 645, svgY: 412, label: '05' },
-      { id: 'L06', name: 'โต๊ะ 06', room: 'large', svgX: 645, svgY: 480, label: '06' },
-      { id: 'L07', name: 'โต๊ะ 07', room: 'large', svgX: 645, svgY: 548, label: '07' },
-      { id: 'L08', name: 'โต๊ะ 08', room: 'large', svgX: 645, svgY: 616, label: '08' },
-      { id: 'L09', name: 'โต๊ะ 09', room: 'large', svgX: 755, svgY: 140, label: '09' },
-      { id: 'L10', name: 'โต๊ะ 10', room: 'large', svgX: 755, svgY: 208, label: '10' },
-      { id: 'L11', name: 'โต๊ะ 11', room: 'large', svgX: 755, svgY: 276, label: '11' },
-      { id: 'L12', name: 'โต๊ะ 12', room: 'large', svgX: 755, svgY: 344, label: '12' },
-      { id: 'L13', name: 'โต๊ะ 13', room: 'large', svgX: 755, svgY: 412, label: '13' },
-      { id: 'L14', name: 'โต๊ะ 14', room: 'large', svgX: 755, svgY: 480, label: '14' },
-      { id: 'L15', name: 'โต๊ะ 15', room: 'large', svgX: 755, svgY: 548, label: '15' },
-      { id: 'L16', name: 'โต๊ะ 16', room: 'large', svgX: 755, svgY: 616, label: '16' },
-      { id: 'L17', name: 'โต๊ะ 17', room: 'large', svgX: 865, svgY: 140, label: '17' },
-      { id: 'L18', name: 'โต๊ะ 18', room: 'large', svgX: 865, svgY: 208, label: '18' },
-      { id: 'L19', name: 'โต๊ะ 19', room: 'large', svgX: 865, svgY: 276, label: '19' },
-      { id: 'L20', name: 'โต๊ะ 20', room: 'large', svgX: 865, svgY: 344, label: '20' },
-      { id: 'L21', name: 'โต๊ะ 21', room: 'large', svgX: 865, svgY: 412, label: '21' },
-      { id: 'L22', name: 'โต๊ะ 22', room: 'large', svgX: 865, svgY: 480, label: '22' },
-      { id: 'L23', name: 'โต๊ะ 23', room: 'large', svgX: 865, svgY: 548, label: '23' },
-      { id: 'L24', name: 'โต๊ะ 24', room: 'large', svgX: 865, svgY: 616, label: '24' }
+      { id: 'L01', name: 'โต๊ะ 01', room: 'large', svgX: 620, svgY: 155, label: '01' },
+      { id: 'L09', name: 'โต๊ะ 09', room: 'large', svgX: 715, svgY: 155, label: '09' },
+      { id: 'L17', name: 'โต๊ะ 17', room: 'large', svgX: 810, svgY: 155, label: '17' },
+      { id: 'L02', name: 'โต๊ะ 02', room: 'large', svgX: 620, svgY: 220, label: '02' },
+      { id: 'L10', name: 'โต๊ะ 10', room: 'large', svgX: 715, svgY: 220, label: '10' },
+      { id: 'L18', name: 'โต๊ะ 18', room: 'large', svgX: 810, svgY: 220, label: '18' },
+      { id: 'L03', name: 'โต๊ะ 03', room: 'large', svgX: 620, svgY: 285, label: '03' },
+      { id: 'L11', name: 'โต๊ะ 11', room: 'large', svgX: 715, svgY: 285, label: '11' },
+      { id: 'L19', name: 'โต๊ะ 19', room: 'large', svgX: 810, svgY: 285, label: '19' },
+      { id: 'L04', name: 'โต๊ะ 04', room: 'large', svgX: 620, svgY: 350, label: '04' },
+      { id: 'L12', name: 'โต๊ะ 12', room: 'large', svgX: 715, svgY: 350, label: '12' },
+      { id: 'L20', name: 'โต๊ะ 20', room: 'large', svgX: 810, svgY: 350, label: '20' },
+      { id: 'L05', name: 'โต๊ะ 05', room: 'large', svgX: 620, svgY: 415, label: '05' },
+      { id: 'L13', name: 'โต๊ะ 13', room: 'large', svgX: 715, svgY: 415, label: '13' },
+      { id: 'L21', name: 'โต๊ะ 21', room: 'large', svgX: 810, svgY: 415, label: '21' },
+      { id: 'L06', name: 'โต๊ะ 06', room: 'large', svgX: 620, svgY: 480, label: '06' },
+      { id: 'L14', name: 'โต๊ะ 14', room: 'large', svgX: 715, svgY: 480, label: '14' },
+      { id: 'L22', name: 'โต๊ะ 22', room: 'large', svgX: 810, svgY: 480, label: '22' },
+      { id: 'L07', name: 'โต๊ะ 07', room: 'large', svgX: 620, svgY: 545, label: '07' },
+      { id: 'L15', name: 'โต๊ะ 15', room: 'large', svgX: 715, svgY: 545, label: '15' },
+      { id: 'L23', name: 'โต๊ะ 23', room: 'large', svgX: 810, svgY: 545, label: '23' },
+      { id: 'L08', name: 'โต๊ะ 08', room: 'large', svgX: 620, svgY: 610, label: '08' },
+      { id: 'L16', name: 'โต๊ะ 16', room: 'large', svgX: 715, svgY: 610, label: '16' },
+      { id: 'L24', name: 'โต๊ะ 24', room: 'large', svgX: 810, svgY: 610, label: '24' },
+      
+      { id: 'S1', name: 'โต๊ะ S1', room: 'small', svgX: 430, svgY: 390, label: 'S1' },
+      { id: 'S2', name: 'โต๊ะ S2', room: 'small', svgX: 320, svgY: 440, label: 'S2' },
+      { id: 'S3', name: 'โต๊ะ S3', room: 'small', svgX: 430, svgY: 490, label: 'S3' },
+      { id: 'S4', name: 'โต๊ะ S4', room: 'small', svgX: 320, svgY: 540, label: 'S4' },
+      { id: 'S5', name: 'โต๊ะ S5', room: 'small', svgX: 430, svgY: 590, label: 'S5' },
     ];
 
     var DEFAULT_TABLE_TAGS = {
@@ -620,6 +723,38 @@
     window.startMapX = 0;
     window.startMapY = 0;
 
+    // Fallback Offline Functions (Overridden if Firebase Connects Successfully)
+    window.dbSaveGuest = async (obj) => {
+      const idx = window.guests.findIndex(x => x.id === obj.id);
+      if(idx >= 0) window.guests[idx] = obj; else window.guests.push(obj);
+      localStorage.setItem('banquet_guests_data', JSON.stringify(window.guests));
+      window.triggerUIUpdates();
+    };
+    window.dbUpdateCheckin = async (id, status, time) => {
+      let g = window.guests.find(x => x.id === id);
+      if(g) { 
+          g.checkedIn = status; 
+          g.checkinTime = time; 
+          localStorage.setItem('banquet_guests_data', JSON.stringify(window.guests));
+          window.triggerUIUpdates(); 
+      }
+    };
+    window.dbDeleteGuest = async (id) => {
+      window.guests = window.guests.filter(x => x.id !== id);
+      localStorage.setItem('banquet_guests_data', JSON.stringify(window.guests));
+      window.triggerUIUpdates();
+    };
+    window.dbSaveTableTags = async (tagsObj) => {
+      window.tableCustomTags = tagsObj;
+      localStorage.setItem('banquet_tags_data', JSON.stringify(window.tableCustomTags));
+      window.triggerUIUpdates();
+    };
+    window.dbBatchReplaceGuests = async (list) => {
+      window.guests = list;
+      localStorage.setItem('banquet_guests_data', JSON.stringify(window.guests));
+      window.triggerUIUpdates();
+    };
+
     function loadLocalData() {
       const savedGuests = localStorage.getItem('banquet_guests_data');
       if (savedGuests) {
@@ -636,16 +771,9 @@
       }
     }
 
-    function saveLocalData() {
-      localStorage.setItem('banquet_guests_data', JSON.stringify(window.guests));
-      localStorage.setItem('banquet_tags_data', JSON.stringify(window.tableCustomTags));
-      triggerUIUpdates();
-    }
-
-    function generateDefault232Guests() {
+    window.generateDefault232Guests = function() {
       const mock = []; let c = 0;
       TABLES_CONFIG.forEach(t => {
-        // Just fill a few for the mockup look
         let fillCount = Math.floor(Math.random() * 6) + 3; 
         for(let i=0; i<fillCount; i++) {
           c++;
@@ -662,41 +790,15 @@
       });
       window.guests = mock;
       localStorage.setItem('banquet_guests_data', JSON.stringify(window.guests));
-    }
-
-    window.dbSaveGuest = async (obj) => {
-      const idx = window.guests.findIndex(x => x.id === obj.id);
-      if(idx >= 0) window.guests[idx] = obj; else window.guests.push(obj);
-      saveLocalData();
-    };
-
-    window.dbUpdateCheckin = async (id, status, time) => {
-      let g = window.guests.find(x => x.id === id);
-      if(g) { g.checkedIn = status; g.checkinTime = time; saveLocalData(); }
-    };
-
-    window.dbDeleteGuest = async (id) => {
-      window.guests = window.guests.filter(x => x.id !== id);
-      saveLocalData();
-    };
-
-    window.dbSaveTableTags = async (tagsObj) => {
-      window.tableCustomTags = tagsObj;
-      saveLocalData();
-    };
-
-    window.dbBatchReplaceGuests = async (list) => {
-      window.guests = list;
-      saveLocalData();
     };
 
     window.addEventListener('DOMContentLoaded', () => {
       loadLocalData();
       initMapZoomPan();
-      triggerUIUpdates();
+      window.triggerUIUpdates();
     });
 
-    function triggerUIUpdates() {
+    window.triggerUIUpdates = function() {
       window.updateDashboardStats();
       window.renderTablesOnSvg();
       window.populateDropdowns();
@@ -704,7 +806,7 @@
       if (window.currentViewingTableId && !document.getElementById('tableDetailsModal').classList.contains('hidden')) {
         window.handleTableClick(window.currentViewingTableId);
       }
-    }
+    };
 
     function getTableTag(tableId) { return window.tableCustomTags[tableId] || 'ทั่วไป'; }
 
@@ -769,7 +871,7 @@
           chair.setAttribute('r', '4.5');
           
           let chairFill = '#ffffff';
-          let chairStroke = '#ffb0be'; // Default empty outline
+          let chairStroke = '#ffb0be';
           
           if (i < total) {
              chairFill = tableGuests[i].checkedIn ? '#3bc796' : '#f06478';
@@ -989,7 +1091,8 @@
       window.tableCustomTags[newId] = newTag || 'ทั่วไป';
 
       window.currentViewingTableId = newId;
-      saveLocalData();
+      await window.dbSaveTableTags(window.tableCustomTags);
+      
       window.closeRenameTableModal();
       window.handleTableClick(newId);
       showToast('เปลี่ยนชื่อโต๊ะสำเร็จ');
@@ -1024,7 +1127,9 @@
       g1.tableId = g2.tableId;
       g2.tableId = tempTable;
 
-      saveLocalData();
+      await window.dbSaveGuest(g1);
+      await window.dbSaveGuest(g2);
+      
       window.closeSwapGuestModal();
       showToast('สลับที่นั่งสำเร็จ');
     };
@@ -1250,7 +1355,12 @@
 
     window.generate232MockGuestsPrompt = () => {
       window.showConfirmModal('สร้าง 232 รายชื่อ', 'ยืนยันจำลองข้อมูลเต็มความจุ?', async () => {
-        generateDefault232Guests();
+        window.generateDefault232Guests();
+        
+        // ถ้าต่อคลาวด์อยู่ ดันขึ้นคลาวด์ด้วย
+        if(window.dbBatchReplaceGuests) {
+            await window.dbBatchReplaceGuests(window.guests);
+        }
         window.closeAdminModal(); 
         showToast('จำลองข้อมูลสำเร็จ');
       });
