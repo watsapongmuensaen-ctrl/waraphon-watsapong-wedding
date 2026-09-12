@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ระบบค้นหาโต๊ะและลงทะเบียนแขก 232 ท่าน (Banquet Seat Finder)</title>
+  <title>ระบบค้นหาโต๊ะและลงทะเบียนแขก 232 ท่าน (Wedding Banquet Seat Finder)</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,12 +20,18 @@
         extend: {
           fontFamily: { sans: ['Kanit', 'sans-serif'] },
           colors: {
-            brand: {
-              50: '#fdf2f8', 
-              100: '#fce7f3', 
-              500: '#db2777', 
-              600: '#be185d', 
-              700: '#9d174d', 
+            wedding: {
+              50: '#fdf4f7',
+              100: '#fbe8ef',
+              200: '#f7d1e0',
+              300: '#f1abc7',
+              400: '#e878a4',
+              500: '#db437e',
+              600: '#c52865',
+              700: '#a51d52',
+              800: '#881b44',
+              900: '#721a3b',
+              burgundy: '#58112e',
             }
           }
         }
@@ -36,17 +42,15 @@
   <style>
     body { 
       font-family: 'Kanit', sans-serif; 
-      background-color: #fcf5f8;
-      /* Floral Background with Burgundy/Pink tint overlay */
+      background-color: #3b0a1d;
       background-image: 
-        linear-gradient(rgba(252, 245, 248, 0.92), rgba(252, 245, 248, 0.94)), 
+        linear-gradient(rgba(88, 17, 46, 0.88), rgba(58, 10, 30, 0.94)), 
         url('https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=2000&auto=format&fit=crop');
       background-size: cover;
       background-attachment: fixed;
       background-position: center;
     }
     
-    /* Animation สำหรับหมุดปักบนโต๊ะ */
     @keyframes pulse-ring {
       0% { transform: scale(0.8); opacity: 1; }
       100% { transform: scale(2.2); opacity: 0; }
@@ -59,11 +63,10 @@
       position: absolute;
       top: -6px; left: -6px; right: -6px; bottom: -6px;
       border-radius: 50%;
-      background-color: rgba(219, 39, 119, 0.6);
+      background-color: rgba(219, 67, 126, 0.6);
       animation: pulse-ring 1.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
     }
 
-    /* Style ของโต๊ะบนผัง */
     .table-node {
       transition: all 0.2s ease-in-out;
       cursor: pointer;
@@ -72,67 +75,63 @@
     }
     .table-node:hover {
       transform: scale(1.15);
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
     }
     .table-node.active-table {
-      filter: drop-shadow(0 0 14px rgba(219, 39, 119, 0.8));
+      filter: drop-shadow(0 0 14px rgba(219, 67, 126, 0.9));
     }
 
-    /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #f472b6; }
+    ::-webkit-scrollbar-thumb { background: #f7d1e0; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #e878a4; }
     
-    /* Corner Floral Decoration */
     .floral-corner-tl {
-      position: absolute; top: -10px; left: -10px; width: 60px; height: 60px;
-      background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path fill="%23db2777" opacity="0.15" d="M0,0 Q50,0 50,50 Q0,50 0,0 Z" /><path fill="%2316a34a" opacity="0.15" d="M0,50 Q50,50 100,100 Q0,100 0,50 Z" /></svg>');
+      position: absolute; top: -6px; left: -6px; width: 50px; height: 50px;
+      background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path fill="%23db437e" opacity="0.3" d="M0,0 Q50,0 50,50 Q0,50 0,0 Z" /><path fill="%2316a34a" opacity="0.2" d="M0,50 Q50,50 100,100 Q0,100 0,50 Z" /></svg>');
       background-size: contain; background-repeat: no-repeat; pointer-events: none;
     }
     .floral-corner-br {
-      position: absolute; bottom: -10px; right: -10px; width: 60px; height: 60px;
-      background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path fill="%23db2777" opacity="0.15" d="M100,100 Q50,100 50,50 Q100,50 100,100 Z" /><path fill="%2316a34a" opacity="0.15" d="M100,50 Q50,50 0,0 Q100,0 100,50 Z" /></svg>');
+      position: absolute; bottom: -6px; right: -6px; width: 50px; height: 50px;
+      background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path fill="%23db437e" opacity="0.3" d="M100,100 Q50,100 50,50 Q100,50 100,100 Z" /><path fill="%2316a34a" opacity="0.2" d="M100,50 Q50,50 0,0 Q100,0 100,50 Z" /></svg>');
       background-size: contain; background-repeat: no-repeat; pointer-events: none;
     }
   </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col relative">
+<body class="text-slate-100 antialiased min-h-screen flex flex-col relative">
 
-  <!-- Header / Navbar -->
-  <header class="bg-gradient-to-r from-pink-950 via-rose-900 to-emerald-950 text-white shadow-md sticky top-0 z-40 bg-opacity-95 backdrop-blur-sm">
+  <header class="bg-gradient-to-r from-wedding-burgundy via-wedding-900 to-emerald-950 text-white shadow-xl sticky top-0 z-40 border-b border-wedding-700/40 backdrop-blur-md bg-opacity-95">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center space-x-3">
-        <div class="bg-white/20 text-white p-2.5 rounded-xl font-bold shadow-lg flex items-center justify-center border border-white/30 backdrop-blur-md">
-          <i class="fa-solid fa-ring text-lg text-pink-200"></i>
+        <div class="bg-gradient-to-br from-wedding-100 to-wedding-300 text-wedding-900 p-2.5 rounded-2xl font-bold shadow-md flex items-center justify-center border border-wedding-200">
+          <i class="fa-solid fa-ring text-lg text-wedding-700"></i>
         </div>
         <div>
           <div class="flex items-center gap-2 flex-wrap">
-            <h1 class="text-lg md:text-xl font-bold tracking-wide text-pink-50">แผนผังที่นั่งงานเลี้ยงฉลองมงคลสมรส</h1>
-            <span id="onlineSyncBadge" class="inline-flex items-center gap-1.5 text-xs bg-pink-950/80 text-pink-300 px-2.5 py-0.5 rounded-full border border-pink-500/40 font-medium shadow-xs">
+            <h1 class="text-lg md:text-xl font-bold tracking-wide text-wedding-50">แผนผังที่นั่งงานฉลองมงคลสมรส</h1>
+            <span id="onlineSyncBadge" class="inline-flex items-center gap-1.5 text-xs bg-wedding-950/90 text-wedding-200 px-2.5 py-0.5 rounded-full border border-wedding-400/40 font-medium shadow-xs">
               <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-wedding-300 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-wedding-400"></span>
               </span>
-              <span id="syncText">โหมดออฟไลน์ (พร้อมใช้งาน GitHub)</span>
+              <span id="syncText">โหมดออฟไลน์ (พร้อมใช้งาน)</span>
             </span>
           </div>
-          <p class="text-xs text-pink-200">ระบบเช็คอินและค้นหาที่นั่ง (รองรับ 232 ท่าน)</p>
+          <p class="text-xs text-wedding-200/90 font-light">ระบบเช็คอินและค้นหาที่นั่ง (รองรับ 232 ท่าน)</p>
         </div>
       </div>
 
       <div class="flex items-center space-x-2">
-        <button onclick="switchTab('search')" id="nav-search" class="px-3 py-1.5 text-xs md:text-sm font-medium rounded-lg transition bg-pink-100 text-pink-900 font-semibold shadow hover:bg-white">
+        <button onclick="switchTab('search')" id="nav-search" class="px-3 py-1.5 text-xs md:text-sm font-medium rounded-xl transition bg-wedding-500 text-white font-semibold shadow hover:bg-wedding-600">
           <i class="fa-solid fa-magnifying-glass me-1"></i> ค้นหาแขก
         </button>
-        <button onclick="openAdminModal()" id="nav-admin" class="px-3 py-1.5 text-xs md:text-sm font-medium rounded-lg text-pink-200 hover:text-white hover:bg-white/10 transition border border-transparent hover:border-pink-300/30">
+        <button onclick="openAdminModal()" id="nav-admin" class="px-3 py-1.5 text-xs md:text-sm font-medium rounded-xl text-wedding-100 hover:text-white hover:bg-white/10 transition border border-wedding-300/30">
           <i class="fa-solid fa-users-gear me-1"></i> จัดการรายชื่อ
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content Container -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-3 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
 
     <!-- LEFT PANEL: Search & Results -->
@@ -140,90 +139,89 @@
 
       <!-- Stats Quick Bar -->
       <div class="grid grid-cols-3 gap-3">
-        <div class="bg-white/80 backdrop-blur p-3 rounded-xl shadow-sm border border-pink-200 text-center">
-          <span class="text-xs text-pink-600 font-semibold block">แขกในระบบ</span>
-          <span id="stat-total" class="text-lg md:text-xl font-bold text-slate-800">0</span>
+        <div class="bg-white/95 text-slate-800 backdrop-blur p-3 rounded-2xl shadow-md border border-wedding-200 text-center">
+          <span class="text-xs text-wedding-800 font-semibold block">แขกในระบบ</span>
+          <span id="stat-total" class="text-lg md:text-xl font-bold text-slate-900">0</span>
           <span class="text-[10px] text-slate-500">/ 232 ท่าน</span>
         </div>
-        <div class="bg-emerald-50/90 backdrop-blur p-3 rounded-xl shadow-sm border border-emerald-200 text-center">
-          <span class="text-xs text-emerald-700 font-semibold block">เช็คอินแล้ว</span>
-          <span id="stat-checked" class="text-lg md:text-xl font-bold text-emerald-600">0</span>
+        <div class="bg-emerald-50/95 text-slate-800 backdrop-blur p-3 rounded-2xl shadow-md border border-emerald-200 text-center">
+          <span class="text-xs text-emerald-800 font-semibold block">เช็คอินแล้ว</span>
+          <span id="stat-checked" class="text-lg md:text-xl font-bold text-emerald-700">0</span>
           <span class="text-[10px] text-emerald-600">ท่าน</span>
         </div>
-        <div class="bg-rose-50/90 backdrop-blur p-3 rounded-xl shadow-sm border border-rose-200 text-center">
-          <span class="text-xs text-rose-700 font-semibold block">ยังไม่เช็คอิน</span>
-          <span id="stat-pending" class="text-lg md:text-xl font-bold text-rose-500">0</span>
-          <span class="text-[10px] text-rose-500">ท่าน</span>
+        <div class="bg-rose-50/95 text-slate-800 backdrop-blur p-3 rounded-2xl shadow-md border border-rose-200 text-center">
+          <span class="text-xs text-rose-800 font-semibold block">ยังไม่เช็คอิน</span>
+          <span id="stat-pending" class="text-lg md:text-xl font-bold text-rose-700">0</span>
+          <span class="text-[10px] text-rose-600">ท่าน</span>
         </div>
       </div>
 
       <!-- Search Input Card -->
-      <div class="bg-white/90 backdrop-blur p-4 rounded-2xl shadow-sm border border-pink-100 flex flex-col gap-3">
+      <div class="bg-white/95 text-slate-800 backdrop-blur p-4 rounded-2xl shadow-lg border border-wedding-200 flex flex-col gap-3">
         
-        <!-- Fast Table Selection Dropdown -->
-        <label for="fastTableSearchSelect" class="text-sm font-semibold text-pink-800 flex items-center justify-between">
-          <span><i class="fa-solid fa-location-crosshairs text-pink-500 me-1.5"></i> ค้นหาตำแหน่งโต๊ะบนผังด่วน</span>
+        <label for="fastTableSearchSelect" class="text-sm font-semibold text-slate-800 flex items-center justify-between">
+          <span><i class="fa-solid fa-location-crosshairs text-wedding-500 me-1.5"></i> ค้นหาตำแหน่งโต๊ะบนผังด่วน</span>
         </label>
-        <select id="fastTableSearchSelect" onchange="jumpToTable()" class="w-full px-4 py-2.5 text-slate-700 bg-pink-50/60 rounded-xl border border-pink-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 text-sm font-medium transition cursor-pointer shadow-sm">
+        <select id="fastTableSearchSelect" onchange="jumpToTable()" class="w-full px-4 py-2.5 text-slate-800 bg-wedding-50 rounded-xl border border-wedding-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-wedding-400 text-sm font-medium transition cursor-pointer shadow-xs">
           <option value="">🎯 -- คลิกเพื่อค้นหาและเลือกชื่อโต๊ะ --</option>
         </select>
 
-        <div class="my-0.5 border-t border-pink-100/50"></div>
+        <div class="my-0.5 border-t border-slate-200"></div>
 
-        <label for="searchInput" class="text-sm font-semibold text-pink-800 flex items-center justify-between">
-          <span><i class="fa-solid fa-magnifying-glass text-pink-500 me-1.5"></i> ค้นหาชื่อแขก / กลุ่มโต๊ะ / เลขโต๊ะ</span>
-          <span class="text-xs font-normal text-slate-400">พิมพ์ค้นหาได้ทันที</span>
+        <label for="searchInput" class="text-sm font-semibold text-slate-800 flex items-center justify-between">
+          <span><i class="fa-solid fa-magnifying-glass text-wedding-500 me-1.5"></i> ค้นหาชื่อแขก / กลุ่มโต๊ะ / เลขโต๊ะ</span>
+          <span class="text-xs font-normal text-slate-500">พิมพ์ค้นหาได้ทันที</span>
         </label>
         
         <div class="relative">
           <input type="text" id="searchInput" oninput="handleSearch()" placeholder="พิมพ์ชื่อจริง, ชื่อเล่น, กลุ่มโต๊ะ หรือ S1..." 
-            class="w-full pl-10 pr-10 py-3 text-slate-800 bg-white rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-sm transition shadow-inner">
-          <i class="fa-solid fa-search absolute left-3.5 top-3.5 text-pink-300 text-base"></i>
-          <button onclick="clearSearch()" id="btnClearSearch" class="hidden absolute right-3 top-3 text-slate-400 hover:text-pink-500 transition">
+            class="w-full pl-10 pr-10 py-3 text-slate-800 bg-wedding-50 rounded-xl border border-wedding-200 focus:outline-none focus:ring-2 focus:ring-wedding-400 text-sm transition shadow-xs placeholder:text-slate-400">
+          <i class="fa-solid fa-search absolute left-3.5 top-3.5 text-wedding-500 text-base"></i>
+          <button onclick="clearSearch()" id="btnClearSearch" class="hidden absolute right-3 top-3 text-slate-400 hover:text-wedding-600 transition">
             <i class="fa-solid fa-circle-xmark text-lg"></i>
           </button>
         </div>
 
         <!-- Filter Buttons & Group Dropdown -->
         <div class="flex flex-wrap items-center gap-1.5 text-xs pt-1">
-          <button onclick="setFilter('all')" id="filter-all" class="px-2.5 py-1 rounded-full bg-pink-600 text-white font-medium shadow-xs">ทั้งหมด</button>
-          <button onclick="setFilter('small')" id="filter-small" class="px-2.5 py-1 rounded-full bg-pink-50 text-pink-700 hover:bg-pink-100 font-medium border border-pink-100">ห้องเล็ก (S1-S5)</button>
-          <button onclick="setFilter('large')" id="filter-large" class="px-2.5 py-1 rounded-full bg-pink-50 text-pink-700 hover:bg-pink-100 font-medium border border-pink-100">ห้องใหญ่ (01-24)</button>
-          <button onclick="setFilter('unchecked')" id="filter-unchecked" class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 hover:bg-rose-100 font-medium border border-rose-100">ยังไม่เช็คอิน</button>
+          <button onclick="setFilter('all')" id="filter-all" class="px-2.5 py-1 rounded-full bg-wedding-600 text-white font-medium shadow-xs">ทั้งหมด</button>
+          <button onclick="setFilter('small')" id="filter-small" class="px-2.5 py-1 rounded-full bg-wedding-50 text-slate-700 hover:bg-wedding-100 font-medium border border-wedding-200">ห้องเล็ก (S1-S5)</button>
+          <button onclick="setFilter('large')" id="filter-large" class="px-2.5 py-1 rounded-full bg-wedding-50 text-slate-700 hover:bg-wedding-100 font-medium border border-wedding-200">ห้องใหญ่ (01-24)</button>
+          <button onclick="setFilter('unchecked')" id="filter-unchecked" class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 hover:bg-rose-100 font-medium border border-rose-200">ยังไม่เช็คอิน</button>
           
-          <select id="groupTagFilterSelect" onchange="handleGroupTagFilterChange()" class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer ms-auto">
+          <select id="groupTagFilterSelect" onchange="handleGroupTagFilterChange()" class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold text-xs focus:outline-none focus:ring-1 focus:ring-emerald-400 cursor-pointer ms-auto">
             <option value="all">🏷️ ทุกกลุ่มโต๊ะ</option>
           </select>
         </div>
       </div>
 
       <!-- Selected Guest Highlight Box -->
-      <div id="highlightCard" class="hidden relative bg-white/95 backdrop-blur p-4 rounded-2xl border border-pink-200 shadow-md overflow-hidden">
+      <div id="highlightCard" class="hidden relative bg-white/95 text-slate-800 backdrop-blur p-4 rounded-2xl border border-wedding-200 shadow-xl overflow-hidden">
         <div class="floral-corner-tl"></div>
         <div class="floral-corner-br"></div>
         <div class="flex flex-col gap-3 relative z-10">
           <div class="flex items-start justify-between gap-2">
             <div>
-              <span class="inline-block px-2 py-0.5 bg-pink-100 text-pink-800 text-xs font-semibold rounded mb-1">
+              <span class="inline-block px-2.5 py-0.5 bg-wedding-100 text-wedding-800 text-xs font-semibold rounded-lg mb-1 border border-wedding-200">
                 <i class="fa-solid fa-location-dot me-1"></i> โต๊ะที่ค้นพบ
               </span>
               <h3 id="hlGuestName" class="text-lg font-bold text-slate-900">คุณสมชาย ใจดี</h3>
               <div class="mt-0.5">
-                <span id="hlTableName" class="text-base font-bold text-pink-600">โต๊ะ S1 - ครอบครัวเจ้าสาว</span> 
-                <span id="hlZone" class="text-sm font-medium text-slate-500">(ห้องจัดเลี้ยงห้องเล็ก)</span>
+                <span id="hlTableName" class="text-base font-bold text-wedding-700">โต๊ะ S1 - ครอบครัวเจ้าสาว</span> 
+                <span id="hlZone" class="text-sm font-medium text-slate-600">(ห้องจัดเลี้ยงห้องเล็ก)</span>
               </div>
-              <p id="hlCapacity" class="text-xs text-slate-600 font-medium mt-1"><i class="fa-solid fa-users me-1 text-pink-400"></i> นั่งร่วมโต๊ะ: <span id="hlOccupancy" class="text-pink-600 font-bold">8/8</span> คน</p>
+              <p id="hlCapacity" class="text-xs text-slate-600 font-medium mt-1"><i class="fa-solid fa-users me-1 text-wedding-500"></i> นั่งร่วมโต๊ะ: <span id="hlOccupancy" class="text-wedding-700 font-bold">8/8</span> คน</p>
             </div>
             <div class="text-right flex flex-col items-end">
-              <button id="hlCheckinBtn" onclick="toggleCheckinCurrent()" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium text-xs shadow transition flex items-center gap-1">
+              <button id="hlCheckinBtn" onclick="toggleCheckinCurrent()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-medium text-xs shadow transition flex items-center gap-1">
                 <i class="fa-solid fa-user-check"></i> <span>เช็คอิน</span>
               </button>
-              <span id="hlCheckinTime" class="text-[11px] text-slate-400 mt-1">ยังไม่ได้ลงทะเบียน</span>
+              <span id="hlCheckinTime" class="text-[11px] text-slate-500 mt-1">ยังไม่ได้ลงทะเบียน</span>
             </div>
           </div>
           <!-- Quick Action Buttons for Highlighted Guest -->
-          <div class="pt-2 border-t border-pink-100 flex items-center justify-end gap-2 text-xs">
-            <button onclick="deleteGuestPrompt(selectedGuestId)" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold rounded-lg transition flex items-center gap-1">
+          <div class="pt-2 border-t border-slate-200 flex items-center justify-end gap-2 text-xs">
+            <button onclick="deleteGuestPrompt(selectedGuestId)" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold rounded-xl transition flex items-center gap-1 border border-rose-200">
               <i class="fa-solid fa-user-minus"></i> ถอดชื่อ
             </button>
           </div>
@@ -231,63 +229,62 @@
       </div>
 
       <!-- Guest List Results Card -->
-      <div id="guestListCard" class="bg-white/95 backdrop-blur rounded-2xl shadow-sm border border-pink-100 flex flex-col overflow-hidden">
-        <div onclick="toggleGuestListCollapse()" class="p-3 bg-pink-50/50 hover:bg-pink-50 flex items-center justify-between text-xs font-semibold text-pink-900 cursor-pointer select-none transition border-b border-pink-100">
+      <div id="guestListCard" class="bg-white/95 text-slate-800 backdrop-blur rounded-2xl shadow-lg border border-wedding-200 flex flex-col overflow-hidden">
+        <div onclick="toggleGuestListCollapse()" class="p-3 bg-wedding-50/80 hover:bg-wedding-50 flex items-center justify-between text-xs font-semibold text-slate-700 cursor-pointer select-none transition border-b border-wedding-100">
           <div class="flex items-center space-x-2">
-            <i id="guestListChevron" class="fa-solid fa-chevron-down text-pink-500 transition-transform duration-300"></i>
+            <i id="guestListChevron" class="fa-solid fa-chevron-down text-wedding-600 transition-transform duration-300"></i>
             <span>รายชื่อแขกผู้มาร่วมงาน (<span id="guestCountDisplay">0</span>)</span>
           </div>
           <div class="flex items-center space-x-2">
-            <span id="collapseStatusText" class="text-[10px] bg-white text-pink-600 font-medium px-2 py-0.5 rounded-full border border-pink-200 shadow-xs">
+            <span id="collapseStatusText" class="text-[10px] bg-white text-wedding-700 font-medium px-2.5 py-0.5 rounded-full border border-wedding-200 shadow-xs">
               ย่อผังรายชื่อ
             </span>
           </div>
         </div>
-        <div id="guestListContainer" class="p-2 overflow-y-auto max-h-[380px] divide-y divide-pink-50 transition-all duration-300">
+        <div id="guestListContainer" class="p-2 overflow-y-auto max-h-[380px] divide-y divide-slate-100 transition-all duration-300">
           <!-- Populated by JavaScript -->
         </div>
       </div>
     </section>
 
-    <!-- RIGHT PANEL: Floor Plan Map -->
     <section id="panel-right" class="lg:col-span-7 flex flex-col gap-3 relative">
-      <div class="bg-white/95 backdrop-blur p-3 md:p-4 rounded-2xl shadow-sm border border-pink-200 flex flex-col flex-1 relative">
-        <!-- Map Toolbar Header -->
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-pink-100">
+      <div class="bg-white/95 text-slate-800 backdrop-blur p-3 md:p-4 rounded-2xl shadow-lg border border-wedding-200 flex flex-col flex-1 relative">
+        
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-200">
           <div class="flex items-center space-x-2">
-            <h2 class="font-bold text-pink-900 text-base flex items-center gap-1.5">
-              <i class="fa-solid fa-map-location-dot text-pink-500"></i> แผนผังผังที่นั่งจัดเลี้ยง
+            <h2 class="font-bold text-slate-900 text-base flex items-center gap-1.5">
+              <i class="fa-solid fa-map-location-dot text-wedding-600"></i> แผนผังผังที่นั่งจัดเลี้ยง
             </h2>
-            <span class="text-xs bg-pink-100 text-pink-800 font-bold px-2.5 py-0.5 rounded-full">
+            <span class="text-xs bg-wedding-50 text-wedding-800 font-bold px-2.5 py-0.5 rounded-full border border-wedding-200">
               รวม 29 โต๊ะ (232 ท่าน)
             </span>
           </div>
           <div class="flex items-center space-x-2 text-xs font-medium text-slate-600">
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span> ครบ 8 คน</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-pink-300 inline-block"></span> มีคนนั่ง</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-white border border-slate-300 inline-block"></span> โต๊ะว่าง</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> ครบ 8 คน</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-wedding-400 inline-block"></span> มีคนนั่ง</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-white border border-slate-400 inline-block"></span> โต๊ะว่าง</span>
           </div>
         </div>
 
         <!-- Zoom Controls Overlay -->
-        <div class="absolute bottom-16 right-6 z-20 flex flex-col gap-2 bg-white/80 backdrop-blur p-1.5 rounded-xl shadow-lg border border-pink-100">
-          <button onclick="zoomMap(0.15)" class="w-8 h-8 flex items-center justify-center bg-white hover:bg-pink-50 text-pink-600 rounded-lg shadow-sm font-bold text-lg"><i class="fa-solid fa-plus"></i></button>
-          <button onclick="zoomMap(-0.15)" class="w-8 h-8 flex items-center justify-center bg-white hover:bg-pink-50 text-pink-600 rounded-lg shadow-sm font-bold text-lg"><i class="fa-solid fa-minus"></i></button>
-          <button onclick="resetZoomPan()" class="w-8 h-8 flex items-center justify-center bg-white hover:bg-pink-50 text-slate-600 rounded-lg shadow-sm text-sm"><i class="fa-solid fa-compress"></i></button>
+        <div class="absolute bottom-16 right-6 z-20 flex flex-col gap-2 bg-white/95 backdrop-blur p-1.5 rounded-2xl shadow-xl border border-wedding-200">
+          <button onclick="zoomMap(0.15)" class="w-8 h-8 flex items-center justify-center bg-wedding-50 hover:bg-wedding-100 text-wedding-800 rounded-xl shadow-xs font-bold text-lg"><i class="fa-solid fa-plus"></i></button>
+          <button onclick="zoomMap(-0.15)" class="w-8 h-8 flex items-center justify-center bg-wedding-50 hover:bg-wedding-100 text-wedding-800 rounded-xl shadow-xs font-bold text-lg"><i class="fa-solid fa-minus"></i></button>
+          <button onclick="resetZoomPan()" class="w-8 h-8 flex items-center justify-center bg-wedding-50 hover:bg-wedding-100 text-slate-700 rounded-xl shadow-xs text-sm"><i class="fa-solid fa-compress"></i></button>
         </div>
 
         <!-- SVG Map Container (Pan and Zoom enabled) -->
-        <div id="svgContainer" class="relative w-full bg-slate-900 rounded-xl overflow-hidden border border-slate-700 p-0 flex items-center justify-center min-h-[550px] cursor-grab active:cursor-grabbing shadow-inner">
+        <div id="svgContainer" class="relative w-full bg-slate-900 rounded-xl overflow-hidden border border-slate-800 p-0 flex items-center justify-center min-h-[550px] cursor-grab active:cursor-grabbing shadow-inner">
           <svg id="banquetSvgMap" viewBox="0 0 1000 700" class="w-full h-auto max-h-[700px] drop-shadow-md select-none touch-none">
             <defs>
               <pattern id="gridPattern" width="30" height="30" patternUnits="userSpaceOnUse">
                 <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#1e293b" stroke-width="1"/>
               </pattern>
               <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
-                <feDropShadow dx="2" dy="4" stdDeviation="4" flood-opacity="0.15"/>
+                <feDropShadow dx="2" dy="4" stdDeviation="4" flood-opacity="0.4"/>
               </filter>
             </defs>
-            <rect width="1000" height="700" fill="#0f172a" />
+            <rect width="1000" height="700" fill="#09060b" />
             <rect width="1000" height="700" fill="url(#gridPattern)" />
 
             <!-- ZOOM WRAPPER -->
@@ -335,64 +332,63 @@
 
               <!-- Animated Pin Marker -->
               <g id="animatedPin" class="hidden">
-                <circle cx="0" cy="0" r="28" fill="none" stroke="#db2777" stroke-width="3" class="pulse-pin"/>
-                <path transform="translate(-16, -38) scale(1.3)" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#db2777" stroke="#ffffff" stroke-width="1.5"/>
+                <circle cx="0" cy="0" r="28" fill="none" stroke="#db437e" stroke-width="3" class="pulse-pin"/>
+                <path transform="translate(-16, -38) scale(1.3)" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#db437e" stroke="#ffffff" stroke-width="1.5"/>
               </g>
 
-            </g> <!-- End Zoom Wrapper -->
+            </g>
           </svg>
         </div>
-        <p class="text-center text-xs text-slate-400 mt-2">
+        <p class="text-center text-xs text-slate-500 mt-2">
           <i class="fa-solid fa-magnifying-glass-plus me-1"></i> ใช้เมาส์หรือนิ้วเลื่อน/ซูมย่อขยายผังได้อิสระ
         </p>
       </div>
     </section>
   </main>
 
-  <!-- ADMIN & BULK IMPORT MODAL -->
-  <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-pink-100">
+  <div id="adminModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white text-slate-800 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-wedding-200">
       
-      <div class="px-6 py-4 bg-pink-900 text-white flex items-center justify-between">
+      <div class="px-6 py-4 bg-gradient-to-r from-wedding-burgundy to-wedding-900 text-white flex items-center justify-between border-b border-wedding-700/40">
         <h3 class="text-lg font-bold flex items-center gap-2">
-          <i class="fa-solid fa-users-gear text-pink-300"></i> จัดการข้อมูลรายชื่อแขก & กลุ่มโต๊ะ
+          <i class="fa-solid fa-users-gear text-wedding-300"></i> จัดการข้อมูลรายชื่อแขก & กลุ่มโต๊ะ
         </h3>
-        <button onclick="closeAdminModal()" class="text-pink-300 hover:text-white text-xl transition">
+        <button onclick="closeAdminModal()" class="text-wedding-200 hover:text-white text-xl transition">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <div class="flex flex-wrap border-b border-pink-100 bg-pink-50/50 px-6 pt-3 gap-2">
-        <button onclick="switchAdminSubTab('bulk')" id="admin-tab-bulk" class="px-4 py-2 border-b-2 border-pink-600 text-pink-700 font-bold text-sm">
+      <div class="flex flex-wrap border-b border-slate-200 bg-wedding-50/50 px-6 pt-3 gap-2">
+        <button onclick="switchAdminSubTab('bulk')" id="admin-tab-bulk" class="px-4 py-2 border-b-2 border-wedding-600 text-wedding-700 font-bold text-sm">
           <i class="fa-solid fa-paste me-1"></i> นำเข้าจาก Excel
         </button>
-        <button onclick="switchAdminSubTab('add')" id="admin-tab-add" class="px-4 py-2 text-slate-500 font-medium text-sm hover:text-pink-700">
+        <button onclick="switchAdminSubTab('add')" id="admin-tab-add" class="px-4 py-2 text-slate-500 font-medium text-sm hover:text-wedding-700">
           <i class="fa-solid fa-user-plus me-1"></i> เพิ่มทีละคน
         </button>
-        <button onclick="switchAdminSubTab('groups')" id="admin-tab-groups" class="px-4 py-2 text-slate-500 font-medium text-sm hover:text-pink-700">
+        <button onclick="switchAdminSubTab('groups')" id="admin-tab-groups" class="px-4 py-2 text-slate-500 font-medium text-sm hover:text-wedding-700">
           <i class="fa-solid fa-tags me-1"></i> ตั้งชื่อกลุ่มโต๊ะ (29 โต๊ะ)
         </button>
-        <button onclick="switchAdminSubTab('tools')" id="admin-tab-tools" class="px-4 py-2 text-slate-500 font-medium text-sm hover:text-pink-700">
+        <button onclick="switchAdminSubTab('tools')" id="admin-tab-tools" class="px-4 py-2 text-slate-500 font-medium text-sm hover:text-wedding-700">
           <i class="fa-solid fa-wrench me-1"></i> เครื่องมืออื่นๆ
         </button>
       </div>
 
-      <div class="p-6 overflow-y-auto flex-1">
+      <div class="p-6 overflow-y-auto flex-1 bg-white">
         <!-- SUB-TAB 1: BULK IMPORT FROM EXCEL -->
         <div id="subtab-bulk" class="space-y-4">
-          <div class="bg-pink-50 border border-pink-200 p-4 rounded-xl text-xs text-pink-900 leading-relaxed">
-            <h4 class="font-bold text-sm mb-1 text-pink-800"><i class="fa-solid fa-lightbulb me-1"></i> คำแนะนำการวางรายชื่อ:</h4>
-            <ul class="list-disc list-inside ml-2 space-y-0.5">
+          <div class="bg-wedding-50 border border-wedding-200 p-4 rounded-2xl text-xs text-wedding-900 leading-relaxed">
+            <h4 class="font-bold text-sm mb-1 text-wedding-800"><i class="fa-solid fa-lightbulb me-1"></i> คำแนะนำการวางรายชื่อ:</h4>
+            <ul class="list-disc list-inside ml-2 space-y-0.5 text-slate-700">
               <li>รองรับรูปแบบ: <code>ชื่อ-นามสกุล, ชื่อเล่น, รหัสโต๊ะ</code></li>
               <li>เช่น: <code>คุณสมชาย ใจดี, ชาย, L01</code> หรือ <code>คุณสมหญิง (หญิง), S1</code></li>
               <li>หากไม่ระบุโต๊ะ ระบบจะนำไปจัดเรียงใส่โต๊ะว่างโต๊ะละ 8 คนให้อัตโนมัติ</li>
             </ul>
           </div>
           <div>
-            <textarea id="bulkInputText" rows="10" placeholder="วางรายชื่อที่นี่..." class="w-full p-3 border border-pink-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-pink-500 focus:outline-none"></textarea>
+            <textarea id="bulkInputText" rows="10" placeholder="วางรายชื่อที่นี่..." class="w-full p-3 bg-wedding-50/50 border border-wedding-200 rounded-2xl font-mono text-xs text-slate-800 focus:ring-2 focus:ring-wedding-400 focus:outline-none"></textarea>
           </div>
           <div class="text-right">
-            <button onclick="processBulkImport()" class="px-5 py-2.5 bg-pink-600 hover:bg-pink-700 text-white font-bold text-sm rounded-xl shadow transition">
+            <button onclick="processBulkImport()" class="px-5 py-2.5 bg-wedding-600 hover:bg-wedding-500 text-white font-bold text-sm rounded-xl shadow transition">
               <i class="fa-solid fa-cloud-arrow-up me-1"></i> บันทึกนำเข้ารายชื่อ
             </button>
           </div>
@@ -400,25 +396,25 @@
 
         <!-- SUB-TAB 2: ADD SINGLE GUEST -->
         <div id="subtab-add" class="hidden space-y-4">
-          <form id="addGuestForm" onsubmit="handleAddSingleGuest(event)" class="bg-white p-4 rounded-xl border border-pink-100 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form id="addGuestForm" onsubmit="handleAddSingleGuest(event)" class="bg-wedding-50/50 p-4 rounded-2xl border border-wedding-200 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">ชื่อ-นามสกุล *</label>
-              <input type="text" id="addName" required class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-pink-500">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อ-นามสกุล *</label>
+              <input type="text" id="addName" required class="w-full p-2.5 text-sm bg-white text-slate-800 border border-wedding-200 rounded-xl focus:ring-2 focus:ring-wedding-400">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">ชื่อเล่น</label>
-              <input type="text" id="addNickname" class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-pink-500">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อเล่น</label>
+              <input type="text" id="addNickname" class="w-full p-2.5 text-sm bg-white text-slate-800 border border-wedding-200 rounded-xl focus:ring-2 focus:ring-wedding-400">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">เลือกโต๊ะที่นั่ง *</label>
-              <select id="addTable" required class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-pink-500"></select>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">เลือกโต๊ะที่นั่ง *</label>
+              <select id="addTable" required class="w-full p-2.5 text-sm bg-white text-slate-800 border border-wedding-200 rounded-xl focus:ring-2 focus:ring-wedding-400"></select>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">หมายเหตุ</label>
-              <input type="text" id="addNotes" class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-pink-500">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">หมายเหตุ</label>
+              <input type="text" id="addNotes" class="w-full p-2.5 text-sm bg-white text-slate-800 border border-wedding-200 rounded-xl focus:ring-2 focus:ring-wedding-400">
             </div>
-            <div class="col-span-2 text-right pt-2 border-t border-slate-100">
-              <button type="submit" class="px-5 py-2 bg-pink-600 hover:bg-pink-700 text-white font-medium text-sm rounded-lg shadow transition">เพิ่มรายชื่อ</button>
+            <div class="col-span-2 text-right pt-2 border-t border-wedding-100">
+              <button type="submit" class="px-5 py-2 bg-wedding-600 hover:bg-wedding-500 text-white font-medium text-sm rounded-xl shadow transition">เพิ่มรายชื่อ</button>
             </div>
           </form>
         </div>
@@ -427,30 +423,30 @@
         <div id="subtab-groups" class="hidden space-y-4">
           <div id="adminTableGroupList" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto p-1"></div>
           <div class="pt-2 text-right">
-            <button onclick="saveAllAdminTableGroups()" class="px-5 py-2.5 bg-pink-600 hover:bg-pink-700 text-white font-bold text-sm rounded-xl shadow transition">บันทึกชื่อกลุ่มโต๊ะทั้งหมด</button>
+            <button onclick="saveAllAdminTableGroups()" class="px-5 py-2.5 bg-wedding-600 hover:bg-wedding-500 text-white font-bold text-sm rounded-xl shadow transition">บันทึกชื่อกลุ่มโต๊ะทั้งหมด</button>
           </div>
         </div>
 
         <!-- SUB-TAB 4: TOOLS -->
         <div id="subtab-tools" class="hidden space-y-4">
-          <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 flex justify-between items-center">
+          <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 flex justify-between items-center">
             <div>
               <h5 class="text-sm font-bold text-amber-900">จำลองข้อมูล 232 ท่านอัตโนมัติ</h5>
               <p class="text-xs text-amber-700 mt-0.5">ใช้เพื่อทดสอบการแสดงผลเต็มความจุของระบบ</p>
             </div>
-            <button onclick="generate232MockGuestsPrompt()" class="px-4 py-2 bg-amber-500 text-white font-bold text-xs rounded-xl shadow">สร้างข้อมูลจำลอง</button>
+            <button onclick="generate232MockGuestsPrompt()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow">สร้างข้อมูลจำลอง</button>
           </div>
-          <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 flex justify-between items-center">
+          <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 flex justify-between items-center">
             <div>
               <h5 class="text-sm font-bold text-emerald-900">ส่งออกรายชื่อ (CSV)</h5>
             </div>
-            <button onclick="exportGuestsToCSV()" class="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow">ดาวน์โหลด CSV</button>
+            <button onclick="exportGuestsToCSV()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow">ดาวน์โหลด CSV</button>
           </div>
-          <div class="bg-rose-50 p-4 rounded-xl border border-rose-200 flex justify-between items-center mt-6">
+          <div class="bg-rose-50 p-4 rounded-2xl border border-rose-200 flex justify-between items-center mt-6">
             <div>
               <h5 class="text-sm font-bold text-rose-900">ล้างข้อมูลแขกทั้งหมด</h5>
             </div>
-            <button onclick="clearAllGuestDataPrompt()" class="px-4 py-2 bg-rose-600 text-white font-bold text-xs rounded-xl shadow">ลบข้อมูลทั้งหมด</button>
+            <button onclick="clearAllGuestDataPrompt()" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow">ลบข้อมูลทั้งหมด</button>
           </div>
         </div>
       </div>
@@ -458,54 +454,118 @@
   </div>
 
   <!-- Table Details Modal -->
-  <div id="tableDetailsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full flex flex-col max-h-[85vh]">
-      <div class="p-4 bg-pink-900 text-white flex justify-between rounded-t-2xl shrink-0">
+  <div id="tableDetailsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white text-slate-800 rounded-3xl shadow-2xl max-w-lg w-full flex flex-col max-h-[85vh] border border-wedding-200">
+      
+      <div class="p-4 bg-gradient-to-r from-wedding-burgundy to-wedding-900 text-white flex justify-between items-center rounded-t-3xl shrink-0 border-b border-wedding-700/40">
         <div>
-          <h3 id="modalTableTitle" class="text-lg font-bold">โต๊ะ</h3>
-          <span id="modalTableTagBadge" class="text-xs bg-pink-300 text-pink-900 font-bold px-2 py-0.5 rounded shadow-sm">Tag</span>
-          <p id="modalTableZone" class="text-xs text-pink-200 mt-1">Zone</p>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 id="modalTableTitle" class="text-lg font-bold text-wedding-50">โต๊ะ S1</h3>
+            <span id="modalTableTagBadge" class="text-xs bg-wedding-100 text-wedding-900 font-bold px-2.5 py-0.5 rounded-lg shadow-xs border border-wedding-300">Tag</span>
+          </div>
+          <div class="flex items-center gap-3 mt-1 text-xs text-wedding-200">
+            <p id="modalTableZone">Zone</p>
+            <button onclick="openRenameTableModal(currentViewingTableId)" class="text-wedding-200 hover:text-white underline font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-pen"></i> เปลี่ยนชื่อ/รหัสโต๊ะ
+            </button>
+          </div>
         </div>
-        <button onclick="closeTableModal()" class="text-pink-300 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+        <button onclick="closeTableModal()" class="text-wedding-200 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
       </div>
-      <div class="p-4 overflow-y-auto flex-1">
-        <div id="modalGuestList" class="space-y-2"></div>
+
+      <div class="p-4 overflow-y-auto flex-1 bg-wedding-50/30 space-y-3">
+        <div class="border-t border-slate-200 pt-1">
+          <span class="text-xs font-semibold text-slate-500 block mb-2">รายชื่อแขกในโต๊ะ:</span>
+          <div id="modalGuestList" class="space-y-2"></div>
+        </div>
       </div>
-      <div class="p-4 bg-pink-50 border-t border-pink-100 flex flex-wrap gap-2 shrink-0 justify-between items-center rounded-b-2xl">
-        <button onclick="openDirectAddGuestModal()" class="px-3 py-1.5 bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold rounded-lg shadow transition">
+
+      <div class="p-4 bg-white border-t border-slate-200 flex flex-wrap gap-2 shrink-0 justify-between items-center rounded-b-3xl">
+        <button onclick="openDirectAddGuestModal()" class="px-3 py-1.5 bg-wedding-600 hover:bg-wedding-500 text-white text-xs font-bold rounded-xl shadow transition">
           <i class="fa-solid fa-user-plus"></i> เพิ่มแขกเข้าโต๊ะ
         </button>
-        <button onclick="addUnknownWalkinGuestDirect()" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg shadow transition">
+        <button onclick="addUnknownWalkinGuestDirect()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition">
           <i class="fa-solid fa-bolt"></i> แขก Walk-in
         </button>
       </div>
     </div>
   </div>
 
-  <!-- DIRECT ADD GUEST MODAL -->
-  <div id="directAddGuestModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[55] hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-pink-100 p-5 space-y-4">
-      <div class="flex items-center justify-between border-b pb-3 border-pink-100">
+  <!-- RENAME TABLE MODAL -->
+  <div id="renameTableModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[65] hidden flex items-center justify-center p-4">
+    <div class="bg-white text-slate-800 rounded-3xl shadow-xl max-w-sm w-full p-5 space-y-4 border border-wedding-200">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <h4 class="font-bold text-slate-900 text-base flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-wedding-600"></i> เปลี่ยนรหัสหรือชื่อโต๊ะ
+        </h4>
+        <button onclick="closeRenameTableModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
         <div>
-          <h4 class="font-bold text-slate-800 text-base flex items-center gap-2">
-            <i class="fa-solid fa-user-plus text-pink-600"></i> เพิ่มแขกเข้าโต๊ะ
-          </h4>
-          <p id="directAddTableLabel" class="text-xs text-pink-600 font-bold mt-0.5">โต๊ะ S1</p>
+          <label class="block font-semibold text-slate-700 mb-1">รหัสโต๊ะ (เช่น S6 หรือ L25)</label>
+          <input type="text" id="renameTableIdInput" class="w-full p-2.5 bg-wedding-50 border border-wedding-200 rounded-2xl text-slate-800 font-bold">
         </div>
-        <button onclick="closeDirectAddGuestModal()" class="text-slate-400 hover:text-pink-600"><i class="fa-solid fa-xmark"></i></button>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">ชื่อแสดงบนผัง (เช่น โต๊ะ 25)</label>
+          <input type="text" id="renameTableNameInput" class="w-full p-2.5 bg-wedding-50 border border-wedding-200 rounded-2xl text-slate-800 font-bold">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">ชื่อกลุ่มโต๊ะ (Tag)</label>
+          <input type="text" id="renameTableTagInput" class="w-full p-2.5 bg-wedding-50 border border-wedding-200 rounded-2xl text-slate-800 font-medium">
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
+        <button onclick="closeRenameTableModal()" class="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs rounded-xl">ยกเลิก</button>
+        <button onclick="confirmRenameTable()" class="px-4 py-1.5 bg-wedding-600 hover:bg-wedding-500 text-white font-bold text-xs rounded-xl shadow">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SWAP GUEST MODAL -->
+  <div id="swapGuestModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[65] hidden flex items-center justify-center p-4">
+    <div class="bg-white text-slate-800 rounded-3xl shadow-xl max-w-sm w-full p-5 space-y-4 border border-wedding-200">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <h4 class="font-bold text-slate-900 text-base flex items-center gap-2">
+          <i class="fa-solid fa-right-left text-wedding-600"></i> สลับที่นั่งแขก
+        </h4>
+        <button onclick="closeSwapGuestModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="text-xs space-y-2">
+        <p class="text-slate-600">แขกคนที่ 1: <span id="swapGuest1Name" class="font-bold text-wedding-700"></span></p>
+        <label class="block font-semibold text-slate-700 mt-2 mb-1">เลือกแขกคนที่ 2 ที่ต้องการสลับที่นั่งด้วย:</label>
+        <select id="swapGuest2Select" class="w-full p-2.5 bg-wedding-50 text-slate-800 border border-wedding-200 rounded-2xl font-medium"></select>
+      </div>
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
+        <button onclick="closeSwapGuestModal()" class="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs rounded-xl">ยกเลิก</button>
+        <button onclick="confirmSwapGuests()" class="px-4 py-1.5 bg-wedding-600 hover:bg-wedding-500 text-white font-bold text-xs rounded-xl shadow">ยืนยันสลับที่นั่ง</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIRECT ADD GUEST MODAL -->
+  <div id="directAddGuestModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[55] hidden flex items-center justify-center p-4">
+    <div class="bg-white text-slate-800 rounded-3xl shadow-xl max-w-md w-full overflow-hidden border border-wedding-200 p-5 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div>
+          <h4 class="font-bold text-slate-900 text-base flex items-center gap-2">
+            <i class="fa-solid fa-user-plus text-wedding-600"></i> เพิ่มแขกเข้าโต๊ะ
+          </h4>
+          <p id="directAddTableLabel" class="text-xs text-wedding-700 font-bold mt-0.5">โต๊ะ S1</p>
+        </div>
+        <button onclick="closeDirectAddGuestModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <form onsubmit="handleConfirmDirectAddGuest(event)" class="space-y-3">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อ-นามสกุลแขก *</label>
-          <input type="text" id="directAddName" required placeholder="เช่น คุณวิชัย ชัยชนะ" class="w-full p-2.5 text-sm border rounded-xl focus:ring-2 focus:ring-pink-500">
+          <input type="text" id="directAddName" required placeholder="เช่น คุณวิชัย ชัยชนะ" class="w-full p-2.5 text-sm bg-wedding-50 text-slate-800 border border-wedding-200 rounded-2xl focus:ring-2 focus:ring-wedding-400">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อเล่น (ถ้ามี)</label>
-          <input type="text" id="directAddNickname" placeholder="เช่น ชัย" class="w-full p-2.5 text-sm border rounded-xl focus:ring-2 focus:ring-pink-500">
+          <input type="text" id="directAddNickname" placeholder="เช่น ชัย" class="w-full p-2.5 text-sm bg-wedding-50 text-slate-800 border border-wedding-200 rounded-2xl focus:ring-2 focus:ring-wedding-400">
         </div>
-        <div class="pt-2 flex items-center justify-end gap-2 border-t border-pink-100">
-          <button type="button" onclick="closeDirectAddGuestModal()" class="px-3 py-1.5 bg-slate-100 text-slate-700 font-medium text-xs rounded-lg">ยกเลิก</button>
-          <button type="submit" class="px-4 py-1.5 bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs rounded-lg shadow transition">
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-200">
+          <button type="button" onclick="closeDirectAddGuestModal()" class="px-3 py-1.5 bg-slate-100 text-slate-700 font-medium text-xs rounded-xl">ยกเลิก</button>
+          <button type="submit" class="px-4 py-1.5 bg-wedding-600 hover:bg-wedding-500 text-white font-bold text-xs rounded-xl shadow transition">
             <i class="fa-solid fa-plus me-1"></i> บันทึก
           </button>
         </div>
@@ -514,28 +574,27 @@
   </div>
 
   <!-- Custom Confirm Modal -->
-  <div id="customConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center">
-      <div class="w-12 h-12 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center mx-auto text-xl font-bold mb-3"><i class="fa-solid fa-question"></i></div>
-      <h4 id="confirmModalTitle" class="font-bold text-slate-800 text-base">ยืนยัน</h4>
-      <p id="confirmModalMessage" class="text-xs text-slate-500 mt-1 mb-4">คุณต้องการทำรายการนี้หรือไม่?</p>
+  <div id="customConfirmModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-white text-slate-800 rounded-3xl shadow-xl max-w-sm w-full p-5 text-center border border-wedding-200">
+      <div class="w-12 h-12 rounded-full bg-wedding-100 text-wedding-700 flex items-center justify-center mx-auto text-xl font-bold mb-3 border border-wedding-200"><i class="fa-solid fa-question"></i></div>
+      <h4 id="confirmModalTitle" class="font-bold text-slate-900 text-base">ยืนยัน</h4>
+      <p id="confirmModalMessage" class="text-xs text-slate-600 mt-1 mb-4">คุณต้องการทำรายการนี้หรือไม่?</p>
       <div class="flex gap-2">
-        <button onclick="closeConfirmModal(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl w-1/2">ยกเลิก</button>
-        <button id="btnConfirmAction" onclick="executeConfirmAction()" class="px-4 py-2 bg-pink-600 text-white font-bold text-xs rounded-xl w-1/2">ยืนยัน</button>
+        <button onclick="closeConfirmModal(false)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-2xl w-1/2">ยกเลิก</button>
+        <button id="btnConfirmAction" onclick="executeConfirmAction()" class="px-4 py-2 bg-wedding-600 text-white font-bold text-xs rounded-2xl w-1/2">ยืนยัน</button>
       </div>
     </div>
   </div>
 
   <!-- Toast Notification -->
   <div id="toastNotification" class="fixed bottom-5 right-5 z-[70] hidden transition-all">
-    <div class="bg-slate-800 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-600 flex items-center gap-3 text-xs font-semibold">
+    <div class="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-wedding-500/50 flex items-center gap-3 text-xs font-semibold">
       <i id="toastIcon" class="fa-solid fa-check-circle text-emerald-400"></i>
       <span id="toastMessage">สำเร็จ</span>
     </div>
   </div>
 
   <script>
-    // 29 Tables Config
     var TABLES_CONFIG = [
       { id: 'S1', name: 'โต๊ะ S1', room: 'small', svgX: 445, svgY: 382, label: 'S1' },
       { id: 'S2', name: 'โต๊ะ S2', room: 'small', svgX: 325, svgY: 425, label: 'S2' },
@@ -590,8 +649,8 @@
     window.currentFilter = 'all';
     window.activeHighlightTableId = null;
     window.pendingConfirmCallback = null;
+    let activeSwapGuestId = null;
 
-    // Zoom Config
     window.mapScale = 1;
     window.mapPanX = 0;
     window.mapPanY = 0;
@@ -599,13 +658,11 @@
     window.startMapX = 0;
     window.startMapY = 0;
 
-    // Local Storage Data Engine (100% Offline & GitHub Compatible)
     function loadLocalData() {
       const savedGuests = localStorage.getItem('banquet_guests_data');
       if (savedGuests) {
         try { window.guests = JSON.parse(savedGuests); } catch(e) { window.guests = []; }
       } else {
-        // Auto seed 232 guests on first launch if empty
         generateDefault232Guests();
       }
 
@@ -643,7 +700,6 @@
       localStorage.setItem('banquet_guests_data', JSON.stringify(window.guests));
     }
 
-    // Hybrid Storage Methods
     window.dbSaveGuest = async (obj) => {
       const idx = window.guests.findIndex(x => x.id === obj.id);
       if(idx >= 0) window.guests[idx] = obj; else window.guests.push(obj);
@@ -739,9 +795,9 @@
 
         let fill = '#ffffff', stroke = '#fbcfe8';
         if (total >= 8) {
-          fill = checkCount === 8 ? '#dcfce7' : '#fce7f3'; stroke = checkCount === 8 ? '#16a34a' : '#db2777';
+          fill = checkCount === 8 ? '#dcfce7' : '#fce7f3'; stroke = checkCount === 8 ? '#16a34a' : '#db437e';
         } else if (total > 0) {
-          fill = '#ffffff'; stroke = '#f472b6';
+          fill = '#ffffff'; stroke = '#e878a4';
         }
 
         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -754,7 +810,7 @@
           chair.setAttribute('cx', t.svgX + Math.cos(angle) * 20);
           chair.setAttribute('cy', t.svgY + Math.sin(angle) * 20);
           chair.setAttribute('r', '3.5');
-          chair.setAttribute('fill', i < total ? (tableGuests[i].checkedIn ? '#10b981' : '#f472b6') : '#ffffff');
+          chair.setAttribute('fill', i < total ? (tableGuests[i].checkedIn ? '#10b981' : '#e878a4') : '#ffffff');
           chair.setAttribute('stroke', '#fbcfe8');
           g.appendChild(chair);
         }
@@ -763,8 +819,8 @@
         tableCircle.setAttribute('cx', t.svgX);
         tableCircle.setAttribute('cy', t.svgY);
         tableCircle.setAttribute('r', '15');
-        tableCircle.setAttribute('fill', isHighlight ? '#fbcfe8' : fill);
-        tableCircle.setAttribute('stroke', isHighlight ? '#be185d' : stroke);
+        tableCircle.setAttribute('fill', isHighlight ? '#fbe8ef' : fill);
+        tableCircle.setAttribute('stroke', isHighlight ? '#c52865' : stroke);
         tableCircle.setAttribute('stroke-width', '2.5');
         tableCircle.setAttribute('filter', 'url(#shadow)');
         g.appendChild(tableCircle);
@@ -774,7 +830,7 @@
         text.setAttribute('y', t.svgY + 4);
         text.setAttribute('font-size', '9.5');
         text.setAttribute('font-weight', 'bold');
-        text.setAttribute('fill', '#9d174d');
+        text.setAttribute('fill', '#881b44');
         text.setAttribute('text-anchor', 'middle');
         text.textContent = t.label;
         g.appendChild(text);
@@ -818,8 +874,8 @@
       window.currentFilter = type;
       ['all', 'small', 'large', 'unchecked'].forEach(f => {
         document.getElementById(`filter-${f}`).className = (f === type) 
-          ? 'px-2.5 py-1 rounded-full bg-pink-600 text-white font-medium shadow-xs' 
-          : 'px-2.5 py-1 rounded-full bg-pink-50 text-pink-700 hover:bg-pink-100 font-medium border border-pink-100';
+          ? 'px-2.5 py-1 rounded-full bg-wedding-600 text-white font-medium shadow-xs' 
+          : 'px-2.5 py-1 rounded-full bg-wedding-50 text-slate-700 hover:bg-wedding-100 font-medium border border-wedding-200';
       });
       window.handleSearch();
     };
@@ -843,7 +899,7 @@
       document.getElementById('guestCountDisplay').innerText = filtered.length;
 
       if (filtered.length === 0) {
-        c.innerHTML = `<div class="text-center py-8 text-pink-300"><i class="fa-solid fa-heart-pulse text-4xl mb-2 block"></i><p class="text-xs">ไม่พบรายชื่อในระบบ</p></div>`;
+        c.innerHTML = `<div class="text-center py-8 text-slate-400"><i class="fa-solid fa-heart-pulse text-4xl mb-2 block text-wedding-300"></i><p class="text-xs">ไม่พบรายชื่อในระบบ</p></div>`;
         return;
       }
 
@@ -852,20 +908,20 @@
         const tag = getTableTag(g.tableId);
         const isSel = window.selectedGuestId === g.id;
         
-        return `<div onclick="window.selectGuest('${g.id}')" class="p-3 rounded-xl transition cursor-pointer flex items-center justify-between gap-2 ${isSel ? 'bg-pink-50 border-2 border-pink-400' : 'bg-white hover:bg-pink-50/50 border border-transparent'}">
+        return `<div onclick="window.selectGuest('${g.id}')" class="p-3 rounded-xl transition cursor-pointer flex items-center justify-between gap-2 ${isSel ? 'bg-wedding-100 border-2 border-wedding-400' : 'bg-white hover:bg-wedding-50 border border-slate-100'}">
           <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-full ${g.checkedIn ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'} flex items-center justify-center text-sm"><i class="fa-solid ${g.checkedIn ? 'fa-check' : 'fa-user'}"></i></div>
+            <div class="w-10 h-10 rounded-full ${g.checkedIn ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-wedding-50 text-wedding-600 border border-wedding-200'} flex items-center justify-center text-sm"><i class="fa-solid ${g.checkedIn ? 'fa-check' : 'fa-user'}"></i></div>
             <div>
-              <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5 flex-wrap">
-                <span>${g.name}</span> ${g.nickname ? `<span class="text-xs font-semibold text-pink-600 bg-pink-50 px-2 py-0.5 rounded border border-pink-100">(${g.nickname})</span>` : ''}
+              <h4 class="font-bold text-slate-900 text-sm flex items-center gap-1.5 flex-wrap">
+                <span>${g.name}</span> ${g.nickname ? `<span class="text-xs font-semibold text-wedding-700 bg-wedding-50 px-2 py-0.5 rounded border border-wedding-200">(${g.nickname})</span>` : ''}
               </h4>
-              <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
-                <span class="font-bold text-pink-600">${t?t.name:'-'}</span>
-                <span class="bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">${tag}</span>
+              <p class="text-xs text-slate-600 mt-0.5 flex items-center gap-1">
+                <span class="font-bold text-wedding-700">${t?t.name:'-'}</span>
+                <span class="bg-wedding-50 text-wedding-800 px-1.5 py-0.5 rounded text-[10px] border border-wedding-200">${tag}</span>
               </p>
             </div>
           </div>
-          <button onclick="event.stopPropagation(); window.toggleCheckin('${g.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition ${g.checkedIn ? 'bg-emerald-50 text-emerald-700' : 'bg-pink-600 text-white'} shadow-sm">
+          <button onclick="event.stopPropagation(); window.toggleCheckin('${g.id}')" class="px-2.5 py-1 rounded-xl text-xs font-bold transition ${g.checkedIn ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-wedding-600 text-white shadow-xs hover:bg-wedding-500'}">
             ${g.checkedIn ? '<i class="fa-solid fa-check me-1"></i>แล้ว' : 'เช็คอิน'}
           </button>
         </div>`;
@@ -878,18 +934,18 @@
       if(!g) return;
       const t = TABLES_CONFIG.find(x => x.id === g.tableId);
       
-      document.getElementById('hlGuestName').innerHTML = `${g.name} ${g.nickname ? `<span class="text-pink-600">(${g.nickname})</span>` : ''}`;
+      document.getElementById('hlGuestName').innerHTML = `${g.name} ${g.nickname ? `<span class="text-wedding-600">(${g.nickname})</span>` : ''}`;
       document.getElementById('hlTableName').innerText = `${t?t.name:'-'} - ${getTableTag(g.tableId)}`;
       document.getElementById('hlZone').innerText = t?.room==='small' ? '(ห้องเล็ก)' : '(ห้องใหญ่)';
       document.getElementById('hlOccupancy').innerText = `${window.guests.filter(x=>x.tableId===g.tableId).length}/8`;
       
       const btn = document.getElementById('hlCheckinBtn');
       if (g.checkedIn) {
-        btn.className = 'px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-bold text-xs';
+        btn.className = 'px-3 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs border border-slate-200';
         btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> ยกเลิก';
         document.getElementById('hlCheckinTime').innerText = `เช็คอิน: ${g.checkinTime||'-'}`;
       } else {
-        btn.className = 'px-3 py-1.5 bg-emerald-500 text-white rounded-lg font-bold text-xs shadow-md';
+        btn.className = 'px-3 py-1.5 bg-emerald-600 text-white rounded-xl font-bold text-xs shadow-md';
         btn.innerHTML = '<i class="fa-solid fa-user-check"></i> เช็คอิน';
         document.getElementById('hlCheckinTime').innerText = 'ยังไม่เช็คอิน';
       }
@@ -917,24 +973,97 @@
       document.getElementById('modalTableTitle').innerText = t.name;
       document.getElementById('modalTableTagBadge').innerText = getTableTag(id);
       const gList = window.guests.filter(x => x.tableId === id);
-      document.getElementById('modalTableZone').innerText = `ที่นั่ง ${gList.length}/8 คน`;
+      document.getElementById('modalTableZone').innerText = `ที่นั่ง ${gList.length}/8 คน (${t.room==='small'?'ห้องเล็ก':'ห้องใหญ่'})`;
       
       document.getElementById('modalGuestList').innerHTML = gList.length ? gList.map((g, i) => `
-        <div class="p-3 border border-pink-100 rounded-xl flex flex-col gap-2 text-sm bg-pink-50/30">
+        <div class="p-2.5 bg-white border border-slate-200 rounded-2xl flex flex-col gap-1.5 text-xs shadow-xs">
           <div class="flex justify-between items-center">
-            <span class="font-bold text-slate-800">${i+1}. ${g.name} ${g.nickname ? `<span class="text-pink-600">(${g.nickname})</span>` : ''}</span>
-            <button onclick="window.toggleCheckin('${g.id}');" class="px-2.5 py-1 text-xs rounded-lg font-semibold ${g.checkedIn?'bg-emerald-100 text-emerald-800':'bg-pink-600 text-white shadow-sm'}">${g.checkedIn?'<i class="fa-solid fa-check"></i> เช็คอินแล้ว':'เช็คอิน'}</button>
+            <span class="font-bold text-slate-900">${i+1}. ${g.name} ${g.nickname ? `<span class="text-wedding-600">(${g.nickname})</span>` : ''}</span>
+            <button onclick="window.toggleCheckin('${g.id}');" class="px-2.5 py-1 text-[11px] rounded-xl font-semibold ${g.checkedIn?'bg-emerald-100 text-emerald-800 border border-emerald-300':'bg-wedding-600 text-white shadow-xs'}">${g.checkedIn?'<i class="fa-solid fa-check"></i> เช็คอินแล้ว':'เช็คอิน'}</button>
           </div>
-          <div class="flex justify-end gap-1.5 border-t border-pink-100/50 pt-2 mt-1">
-            <button onclick="window.deleteGuestPrompt('${g.id}')" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium text-xs rounded-lg transition"><i class="fa-solid fa-user-minus"></i> ถอดชื่อ</button>
+          <div class="flex justify-end gap-1.5 border-t border-slate-100 pt-1.5 mt-0.5">
+            <button onclick="openSwapGuestModal('${g.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] rounded-xl transition border border-indigo-200"><i class="fa-solid fa-right-left"></i> สลับที่นั่ง</button>
+            <button onclick="window.deleteGuestPrompt('${g.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-[11px] rounded-xl transition border border-rose-200"><i class="fa-solid fa-user-minus"></i> ถอดชื่อ</button>
           </div>
         </div>
-      `).join('') : '<p class="text-center text-slate-400 py-4"><i class="fa-solid fa-chair text-2xl block mb-2 text-pink-200"></i>โต๊ะว่าง</p>';
+      `).join('') : '<p class="text-center text-slate-400 py-3 text-xs"><i class="fa-solid fa-chair text-xl block mb-1 text-wedding-300"></i>โต๊ะว่าง</p>';
       
       document.getElementById('tableDetailsModal').classList.remove('hidden');
     };
 
     window.closeTableModal = () => document.getElementById('tableDetailsModal').classList.add('hidden');
+
+    window.openRenameTableModal = function(tableId) {
+      const t = TABLES_CONFIG.find(x => x.id === tableId);
+      if(!t) return;
+      document.getElementById('renameTableIdInput').value = t.id;
+      document.getElementById('renameTableNameInput').value = t.name;
+      document.getElementById('renameTableTagInput').value = getTableTag(tableId);
+      document.getElementById('renameTableModal').classList.remove('hidden');
+    };
+    window.closeRenameTableModal = () => document.getElementById('renameTableModal').classList.add('hidden');
+
+    window.confirmRenameTable = async function() {
+      const oldId = window.currentViewingTableId;
+      const newId = document.getElementById('renameTableIdInput').value.trim();
+      const newName = document.getElementById('renameTableNameInput').value.trim();
+      const newTag = document.getElementById('renameTableTagInput').value.trim();
+      if(!oldId || !newId || !newName) return showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'fa-triangle-exclamation');
+
+      const tObj = TABLES_CONFIG.find(x => x.id === oldId);
+      if(tObj) {
+        tObj.id = newId;
+        tObj.name = newName;
+        tObj.label = newName.replace('โต๊ะ','').trim();
+      }
+
+      window.guests.forEach(g => {
+        if(g.tableId === oldId) g.tableId = newId;
+      });
+
+      delete window.tableCustomTags[oldId];
+      window.tableCustomTags[newId] = newTag || 'ทั่วไป';
+
+      window.currentViewingTableId = newId;
+      saveLocalData();
+      window.closeRenameTableModal();
+      window.handleTableClick(newId);
+      showToast('เปลี่ยนชื่อ/รหัสโต๊ะเรียบร้อยแล้ว');
+    };
+
+    window.openSwapGuestModal = function(guestId) {
+      activeSwapGuestId = guestId;
+      const g1 = window.guests.find(x => x.id === guestId);
+      if(!g1) return;
+      document.getElementById('swapGuest1Name').innerText = `${g1.name} (${getTableTag(g1.tableId)})`;
+      
+      const select = document.getElementById('swapGuest2Select');
+      select.innerHTML = '';
+      window.guests.forEach(other => {
+        if(other.id !== guestId) {
+          const t = TABLES_CONFIG.find(x => x.id === other.tableId);
+          select.innerHTML += `<option value="${other.id}">${other.name} - ${t?t.name:''}</option>`;
+        }
+      });
+      document.getElementById('swapGuestModal').classList.remove('hidden');
+    };
+    window.closeSwapGuestModal = () => { document.getElementById('swapGuestModal').classList.add('hidden'); activeSwapGuestId = null; };
+
+    window.confirmSwapGuests = async function() {
+      if(!activeSwapGuestId) return;
+      const g2Id = document.getElementById('swapGuest2Select').value;
+      const g1 = window.guests.find(x => x.id === activeSwapGuestId);
+      const g2 = window.guests.find(x => x.id === g2Id);
+      if(!g1 || !g2) return;
+
+      const tempTable = g1.tableId;
+      g1.tableId = g2.tableId;
+      g2.tableId = tempTable;
+
+      saveLocalData();
+      window.closeSwapGuestModal();
+      showToast(`สลับที่นั่งระหว่าง ${g1.name} และ ${g2.name} เรียบร้อย`);
+    };
 
     window.openDirectAddGuestModal = () => {
       if (!window.currentViewingTableId) return;
@@ -986,7 +1115,6 @@
       showToast(`เพิ่มแขก Walk-in เข้าโต๊ะเรียบร้อยแล้ว`);
     };
 
-    // Map Zoom & Pan Control
     function initMapZoomPan() {
       const svgContainer = document.getElementById('svgContainer');
       svgContainer.addEventListener('wheel', (e) => {
@@ -1059,7 +1187,6 @@
       applyMapTransform();
     };
 
-    // Admin & Bulk Modal Logic
     window.openAdminModal = () => {
       window.populateTableDropdown();
       window.populateTableGroupAdminList();
@@ -1069,7 +1196,7 @@
     window.switchAdminSubTab = (tab) => {
       ['bulk', 'add', 'groups', 'tools'].forEach(t => {
         document.getElementById(`subtab-${t}`).classList.toggle('hidden', t !== tab);
-        document.getElementById(`admin-tab-${t}`).className = (t === tab) ? 'px-4 py-2 border-b-2 border-pink-600 text-pink-700 font-bold text-sm' : 'px-4 py-2 text-slate-500 font-medium text-sm hover:text-pink-700';
+        document.getElementById(`admin-tab-${t}`).className = (t === tab) ? 'px-4 py-2 border-b-2 border-wedding-600 text-wedding-700 font-bold text-sm' : 'px-4 py-2 text-slate-500 font-medium text-sm hover:text-wedding-700';
       });
     };
 
@@ -1080,15 +1207,15 @@
       TABLES_CONFIG.forEach(t => {
         const currentTag = getTableTag(t.id);
         const card = document.createElement('div');
-        card.className = 'p-3 bg-pink-50 border border-pink-100 rounded-xl flex items-center justify-between gap-2';
+        card.className = 'p-3 bg-wedding-50/50 border border-wedding-200 rounded-2xl flex items-center justify-between gap-2';
         card.innerHTML = `
           <div class="shrink-0 w-24">
-            <span class="font-bold text-slate-800 text-xs block">${t.name}</span>
-            <span class="text-[10px] text-slate-400 block">${t.room === 'small' ? 'ห้องเล็ก' : 'ห้องใหญ่'}</span>
+            <span class="font-bold text-slate-900 text-xs block">${t.name}</span>
+            <span class="text-[10px] text-slate-500 block">${t.room === 'small' ? 'ห้องเล็ก' : 'ห้องใหญ่'}</span>
           </div>
           <div class="flex-1">
             <input type="text" id="adminTableTagInput_${t.id}" value="${currentTag}" placeholder="ระบุชื่อกลุ่มโต๊ะ..." 
-              class="w-full p-2 text-xs border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 bg-white font-medium shadow-inner">
+              class="w-full p-2 text-xs border border-wedding-200 rounded-xl focus:ring-2 focus:ring-wedding-400 bg-white text-slate-800 font-medium shadow-xs">
           </div>
         `;
         container.appendChild(card);
@@ -1169,7 +1296,7 @@
       window.showConfirmModal('ล้างข้อมูล', 'ต้องการลบข้อมูลแขกทั้งหมดทิ้งหรือไม่?', async () => {
         await window.dbBatchReplaceGuests([]);
         window.closeAdminModal(); 
-        showToast('ล้างข้อมูลทั้งหมดแล้ว');
+        showToast('ลบข้อมูลทั้งหมดแล้ว');
       });
     };
 
