@@ -482,11 +482,14 @@
   </div>
 
   <div id="customConfirmModal" class="fixed inset-0 bg-wedding-900/60 backdrop-blur-sm z-[75] hidden flex items-center justify-center p-4">
-    <div class="bg-white text-wedding-800 rounded-2xl shadow-soft-pink max-w-xs w-full p-6 text-center border border-wedding-200">
-      <div class="w-14 h-14 rounded-full bg-wedding-50 text-wedding-500 flex items-center justify-center mx-auto text-2xl font-bold mb-3 border border-wedding-100"><i class="fa-solid fa-question"></i></div>
-      <h4 id="confirmModalTitle" class="font-extrabold text-lg text-wedding-800">ยืนยัน</h4>
+    <div class="bg-white text-wedding-800 rounded-2xl shadow-soft-pink max-w-sm w-full p-6 text-center border border-wedding-200">
+      <div class="w-14 h-14 rounded-full bg-wedding-50 text-wedding-500 flex items-center justify-center mx-auto text-2xl font-bold mb-3 border border-wedding-100"><i class="fa-solid fa-triangle-exclamation text-rose-500"></i></div>
+      <h4 id="confirmModalTitle" class="font-extrabold text-lg text-wedding-800">ยืนยันการลบ</h4>
       <p id="confirmModalMessage" class="text-sm font-medium text-wedding-500 mt-1 mb-5">คุณต้องการทำรายการนี้หรือไม่?</p>
-      <div class="flex gap-2"><button onclick="closeConfirmModal(false)" class="flex-1 py-2 bg-gray-100 text-gray-600 font-bold rounded-xl">ยกเลิก</button><button id="btnConfirmAction" onclick="executeConfirmAction()" class="flex-1 py-2 bg-wedding-400 hover:bg-wedding-500 text-white font-bold rounded-xl">ยืนยัน</button></div>
+      <div class="flex gap-2">
+        <button onclick="closeConfirmModal(false)" class="flex-1 py-2.5 bg-gray-100 text-gray-600 font-bold rounded-xl transition hover:bg-gray-200">ยกเลิก</button>
+        <button id="btnConfirmAction" onclick="executeConfirmAction()" class="flex-1 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-md transition">ลบรายชื่อ</button>
+      </div>
     </div>
   </div>
 
@@ -502,8 +505,6 @@
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, query, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // ⬇️ นำ Config จากหน้า Firebase Console ของคุณมาวางแทนที่ข้างล่างนี้ ⬇️
-    // (หากยังไม่นำมาใส่ ระบบจะสลับไปใช้ Local Storage บนอุปกรณ์อัตโนมัติ)
     const userFirebaseConfig = {
       // apiKey: "AIzaSy...",
       // authDomain: "your-project.firebaseapp.com",
@@ -526,15 +527,11 @@
         firebaseConfig = userFirebaseConfig;
     }
 
-    // ฟังก์ชันสำหรับสลับกลับไปใช้ Local Storage ทันทีเมื่อ Firebase มีปัญหา
     window.fallbackToOfflineMode = () => {
-        console.warn("สลับเข้าสู่โหมดออฟไลน์อัตโนมัติ (Local Storage) เนื่องจากฐานข้อมูลขัดข้อง/ติดสิทธิ์");
-        user = null; // ตัดการเชื่อมต่อคลาวด์
-        
+        user = null;
         if (unsubscribeGuests) unsubscribeGuests();
         if (unsubscribeTags) unsubscribeTags();
 
-        // ปรับ UI แจ้งเตือนสถานะออฟไลน์
         const badge = document.getElementById('onlineSyncBadge');
         const text = document.getElementById('syncText');
         if(badge && text) {
@@ -545,11 +542,10 @@
             if(pings.length >= 2) {
                 pings[0].classList.replace('bg-emerald-400', 'bg-rose-300');
                 pings[1].classList.replace('bg-emerald-500', 'bg-rose-400');
-                pings[0].classList.remove('animate-ping'); // หยุดกระพริบ
+                pings[0].classList.remove('animate-ping');
             }
         }
 
-        // คืนค่าฟังก์ชันบันทึกข้อมูลกลับเป็น Local Storage แบบดั้งเดิม
         window.dbSaveGuest = async (obj) => {
             const idx = window.guests.findIndex(x => x.id === obj.id);
             if(idx >= 0) window.guests[idx] = obj; else window.guests.push(obj);
@@ -563,7 +559,6 @@
         window.dbSaveTableTags = async (tagsObj) => { window.tableCustomTags = tagsObj; window.saveLocalData(); };
         window.dbBatchReplaceGuests = async (list) => { window.guests = list; window.saveLocalData(); };
         
-        // โหลดข้อมูลเก่าจากในเครื่องมาแสดงแทน
         if (window.loadLocalData) {
             window.loadLocalData();
             if(window.triggerUIUpdates) window.triggerUIUpdates();
@@ -572,8 +567,7 @@
 
     window.initFirebaseSystem = async () => {
         if (!firebaseConfig || !firebaseConfig.apiKey) {
-            console.log("Offline mode: No Firebase config found. Using LocalStorage instead.");
-            return; // Fallback to original local storage functions
+            return;
         }
 
         try {
@@ -585,9 +579,6 @@
             user = userCred.user;
             if (!user) return;
 
-            console.log("Firebase Connected. Switching to Real-Time Online Mode.");
-
-            // Update Badge UI to show "Online"
             const badge = document.getElementById('onlineSyncBadge');
             const text = document.getElementById('syncText');
             if(badge && text) {
@@ -602,41 +593,36 @@
                 }
             }
 
-            // Real-time Listeners
-        const guestsQ = query(collection(db, `${DB_PATH}/guests`));
-        unsubscribeGuests = onSnapshot(guestsQ, (snapshot) => {
-            const fetched = [];
-            snapshot.forEach(d => fetched.push(d.data()));
-            window.guests = fetched;
-            localStorage.setItem('banquet_guests_data', JSON.stringify(window.guests)); // Offline backup
-            if(window.triggerUIUpdates) window.triggerUIUpdates();
-        }, (err) => {
-            console.warn("Firebase Sync Warning:", err.message);
-            if (err.message.includes("permissions") || err.code === 'permission-denied') {
-                if(window.showToast) window.showToast("ฐานข้อมูลติดล็อค: เปลี่ยนเข้าสู่โหมดออฟไลน์", "fa-lock");
-                window.fallbackToOfflineMode();
-            }
-        });
+            const guestsQ = query(collection(db, `${DB_PATH}/guests`));
+            unsubscribeGuests = onSnapshot(guestsQ, (snapshot) => {
+                const fetched = [];
+                snapshot.forEach(d => fetched.push(d.data()));
+                window.guests = fetched;
+                localStorage.setItem('banquet_guests_data', JSON.stringify(window.guests));
+                if(window.triggerUIUpdates) window.triggerUIUpdates();
+            }, (err) => {
+                if (err.message.includes("permissions") || err.code === 'permission-denied') {
+                    window.fallbackToOfflineMode();
+                }
+            });
 
-        const tagsRef = doc(db, `${DB_PATH}/settings`, 'tags');
-        unsubscribeTags = onSnapshot(tagsRef, (docSnap) => {
-            if (docSnap.exists()) {
-                window.tableCustomTags = docSnap.data();
-                localStorage.setItem('banquet_tags_data', JSON.stringify(window.tableCustomTags));
-            }
-            if(window.triggerUIUpdates) window.triggerUIUpdates();
-        }, (err) => {
-            console.warn("Tags Sync Warning:", err.message);
-            if (err.message.includes("permissions") || err.code === 'permission-denied') {
-                window.fallbackToOfflineMode();
-            }
-        });
+            const tagsRef = doc(db, `${DB_PATH}/settings`, 'tags');
+            unsubscribeTags = onSnapshot(tagsRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    window.tableCustomTags = docSnap.data();
+                    localStorage.setItem('banquet_tags_data', JSON.stringify(window.tableCustomTags));
+                }
+                if(window.triggerUIUpdates) window.triggerUIUpdates();
+            }, (err) => {
+                if (err.message.includes("permissions") || err.code === 'permission-denied') {
+                    window.fallbackToOfflineMode();
+                }
+            });
 
-        // Override Default CRUD functions for Online Sync
             window.dbSaveGuest = async (obj) => {
                 if (!user) return window.fallbackToOfflineMode();
                 try { await setDoc(doc(db, `${DB_PATH}/guests`, obj.id), obj); } 
-                catch(e) { console.error(e); if(e.message.includes("permissions")) window.fallbackToOfflineMode(); }
+                catch(e) { if(e.message.includes("permissions")) window.fallbackToOfflineMode(); }
             };
             
             window.dbUpdateCheckin = async (id, status, time) => {
@@ -645,20 +631,20 @@
                 if(g) {
                     g.checkedIn = status; g.checkinTime = time;
                     try { await setDoc(doc(db, `${DB_PATH}/guests`, id), g); }
-                    catch(e) { console.error(e); if(e.message.includes("permissions")) window.fallbackToOfflineMode(); }
+                    catch(e) { if(e.message.includes("permissions")) window.fallbackToOfflineMode(); }
                 }
             };
 
             window.dbDeleteGuest = async (id) => {
                 if (!user) return window.fallbackToOfflineMode();
                 try { await deleteDoc(doc(db, `${DB_PATH}/guests`, id)); }
-                catch(e) { console.error(e); if(e.message.includes("permissions")) window.fallbackToOfflineMode(); }
+                catch(e) { if(e.message.includes("permissions")) window.fallbackToOfflineMode(); }
             };
 
             window.dbSaveTableTags = async (tagsObj) => {
                 if (!user) return window.fallbackToOfflineMode();
                 try { await setDoc(doc(db, `${DB_PATH}/settings`, 'tags'), tagsObj); }
-                catch(e) { console.error(e); if(e.message.includes("permissions")) window.fallbackToOfflineMode(); }
+                catch(e) { if(e.message.includes("permissions")) window.fallbackToOfflineMode(); }
             };
 
             window.dbBatchReplaceGuests = async (list) => {
@@ -668,17 +654,16 @@
                     window.guests.forEach(g => batch.delete(doc(db, `${DB_PATH}/guests`, g.id)));
                     list.forEach(g => batch.set(doc(db, `${DB_PATH}/guests`, g.id), g));
                     await batch.commit();
-                } catch(e) { console.error(e); if(e.message.includes("permissions")) window.fallbackToOfflineMode(); }
+                } catch(e) { if(e.message.includes("permissions")) window.fallbackToOfflineMode(); }
             };
 
         } catch (e) {
-            console.error("Firebase Initialization Error (Continuing offline):", e);
             window.fallbackToOfflineMode();
         }
     };
 
     window.addEventListener('DOMContentLoaded', () => {
-        setTimeout(window.initFirebaseSystem, 500); // Give time for UI to finish loading
+        setTimeout(window.initFirebaseSystem, 500);
     });
   </script>
 
@@ -752,7 +737,6 @@
       else { window.tableCustomTags = { ...DEFAULT_TABLE_TAGS }; }
     }
 
-    // Default Fallback Functions (Will be overridden by Firebase if connected)
     window.saveLocalData = function() {
       localStorage.setItem('banquet_guests_data', JSON.stringify(window.guests));
       localStorage.setItem('banquet_tags_data', JSON.stringify(window.tableCustomTags));
@@ -843,7 +827,6 @@
         const total = tableGuests.length;
         const isHighlight = window.activeHighlightTableId === t.id;
 
-        // Soft Blush Pink Theme Colors for SVG Map
         let fill = '#FFFFFF', stroke = '#F4C2D7'; 
         if (total >= 8) { 
             fill = checkCount === 8 ? '#E6F4EA' : '#FFFFFF';
@@ -1068,7 +1051,6 @@
       if(!g1 || !g2) return; 
       const tempTable = g1.tableId; g1.tableId = g2.tableId; g2.tableId = tempTable;
       
-      // Save both guests sequentially to ensure data consistency
       await window.dbSaveGuest(g1);
       await window.dbSaveGuest(g2);
       
@@ -1186,12 +1168,31 @@
       const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8;'})); a.download = `แขก_${window.guests.length}ท่าน_${new Date().toISOString().slice(0,10)}.csv`; a.click();
     };
 
-    window.showConfirmModal = (title, msg, cb) => { document.getElementById('confirmModalTitle').innerText = title; document.getElementById('confirmModalMessage').innerText = msg; window.pendingConfirmCallback = cb; document.getElementById('customConfirmModal').classList.remove('hidden'); };
+    window.showConfirmModal = (title, msg, cb) => { 
+      document.getElementById('confirmModalTitle').innerText = title; 
+      document.getElementById('confirmModalMessage').innerText = msg; 
+      window.pendingConfirmCallback = cb; 
+      document.getElementById('customConfirmModal').classList.remove('hidden'); 
+    };
     window.closeConfirmModal = () => document.getElementById('customConfirmModal').classList.add('hidden');
     window.executeConfirmAction = () => { window.closeConfirmModal(); if(window.pendingConfirmCallback) window.pendingConfirmCallback(); };
     window.showToast = (msg) => { document.getElementById('toastMessage').innerText = msg; const t = document.getElementById('toastNotification'); t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 3000); };
     window.toggleGuestListCollapse = () => { window.isGuestListCollapsed = !window.isGuestListCollapsed; document.getElementById('guestListContainer').classList.toggle('hidden', window.isGuestListCollapsed); document.getElementById('guestListChevron').style.transform = window.isGuestListCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'; };
-    window.deleteGuestPrompt = (id) => window.showConfirmModal('ลบแขก', 'ยืนยันการถอดชื่อนี้?', async () => { await window.dbDeleteGuest(id); window.showToast('ลบเรียบร้อย'); });
+    
+    window.deleteGuestPrompt = (id) => {
+      const g = window.guests.find(x => x.id === id);
+      const guestNameLabel = g ? `คุณ${g.name}` : 'รายชื่อนี้';
+      window.showConfirmModal(
+        'ยืนยันการลบรายชื่อแขก', 
+        `คุณต้องการลบ "${guestNameLabel}" ออกจากระบบใช่หรือไม่? (การกระทำนี้ช่วยป้องกันการพิมพ์ชื่อผิดพลาดและสามารถเพิ่มใหม่ได้)`, 
+        async () => { 
+          await window.dbDeleteGuest(id); 
+          window.showToast('ลบรายชื่อออกเรียบร้อยแล้ว'); 
+          document.getElementById('highlightCard').classList.add('hidden');
+        }
+      );
+    };
+
     window.switchTab = (t) => { if(t==='admin') window.openAdminModal(); };
   </script>
 </body>
